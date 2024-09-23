@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className="overflow-x-hidden">
         <ThemeProvider attribute="class" defaultTheme="light">
           {children}
         </ThemeProvider>

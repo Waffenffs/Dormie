@@ -22,13 +22,13 @@ const schema = z.object({
 })
 
 // TODOS:
-// 1. Handle errors after validation succeeds
-// 2. Implement sonners after error occurs by calling sonners()
-// 3. Create /feed for authenticated users
+// 1. Implement sonners after error occurs by calling sonners()
+// 2. Polish errors
 
 // DONE:
 // 1. Implement form validation for registration
 // ---> Maybe if mode "login" then fire login() and vice versa
+// 2. Handle errors after validation succeeds
 export async function authenticate(_prevState: any, formData: FormData) {
     const supabase = createClient();
 
@@ -76,8 +76,22 @@ export async function authenticate(_prevState: any, formData: FormData) {
             }
         }
 
-        revalidatePath('/', 'layout');
-        redirect('/listings')
+        const { error: error_one } = await supabase.from('users').insert({
+            email: validation.data.email
+        })
+
+        if (error_one) {
+            return {
+                errors: [{
+                    message: error_one.message,
+                    path: ['supabase_login'],
+                    code: 'custom'
+                }] as ZodIssue[]
+            }
+        }
+
+        revalidatePath('/', 'layout')
+        redirect('/')
     }
 
     return { errors: [] }

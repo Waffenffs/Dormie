@@ -1,4 +1,4 @@
-import { authenticate } from "./action"
+import { authenticate } from "./actions"
 
 import Form from "../components/form"
 

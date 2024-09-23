@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react" 
 import Link from "next/link";
 
 export default function Hero() {
@@ -25,6 +26,7 @@ export default function Hero() {
                             className="self-center md:self-start px-4" 
                             href={'/listings'}
                         >
+                            <ArrowRight />
                             Explore
                         </Link>
                     </Button>
