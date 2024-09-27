@@ -16,7 +16,10 @@ export default function Navigation({ user }: { user: User | null }) {
     return (
         <nav className="w-full flex justify-between items-center items-center py-2 px-4 bg-background/50 backdrop-blur-md sticky top-0">
             <section>
-                <h2 className="text-2xl md:text-4xl font-bold tracking-wide">Dormie</h2>
+                <Link 
+                    href={"/"} 
+                    className="text-2xl md:text-4xl font-bold tracking-wide"
+                >Dormie</Link>
             </section>
             <section className="flex flex-row justify-center items-center gap-2">
                 <ThemeSwitcherButton />
@@ -26,7 +29,10 @@ export default function Navigation({ user }: { user: User | null }) {
                     </Button>
                 }
                 {user && 
-                    <Button variant={"destructive"} onClick={() => handleLogout()}>Logout</Button>
+                    <Button 
+                        variant={"destructive"} 
+                        onClick={() => handleLogout()}
+                    >Logout</Button>
                 }
             </section>
         </nav>

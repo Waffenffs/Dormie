@@ -67,16 +67,18 @@ export default function Form({ action }: Props) {
                 <Button 
                     className="mt-8" 
                     type="submit" 
-                    onClick={() => setMode("login")} disabled={pending}
+                    onClick={() => setMode("login")} 
+                    disabled={pending}
                 >
                     {pending ? 'Logging in...' : 'Login'}
                 </Button>
                 <ErrorMessage errors={supabaseLoginErrors} />
                 <Button 
-                    variant={"outline"} 
-                    type="submit" 
-                    onClick={() => setMode("register")} 
                     className="mt-2"
+                    type="submit" 
+                    variant={"outline"} 
+                    onClick={() => setMode("register")} 
+                    disabled={pending}
                 >
                     {pending ? 'Registering...' : 'Register'}
                 </Button>

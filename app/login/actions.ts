@@ -76,8 +76,11 @@ export async function authenticate(_prevState: any, formData: FormData) {
             }
         }
 
+        const { data } = await supabase.auth.getUser();
+
         const { error: error_one } = await supabase.from('users').insert({
-            email: validation.data.email
+            id: data.user?.id,
+            email: validation.data.email,
         })
 
         if (error_one) {
