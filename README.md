@@ -8,15 +8,18 @@
 
 ## Getting Started
 
-1. Install the project dependencies:
+1. Clone the project
+```bash
+git clone https://github.com/Waffenffs/Dormie.git
+```
+
+2. Install the project dependencies:
 
 ```bash
 npm install
-# or
-pnpm install
 ```
 
-2. Run the development server:
+3. Run the development server:
 
 ```bash
 npm run dev
@@ -30,4 +33,4 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - Use ES6 for declaring components
 
 ### BUGS
-1. Login form isn't properly utilizing pending state
+1. Login form isn't properly utilizing pending state (?)
