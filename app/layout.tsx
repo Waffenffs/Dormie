@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 import ThemeProvider from "./components/providers/theme-provider";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Dormie",
@@ -22,6 +23,7 @@ export default function RootLayout({
       <body className="overflow-x-hidden">
         <ThemeProvider attribute="class" defaultTheme="light">
           {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

@@ -22,9 +22,15 @@ export default function Form({ action }: Props) {
     // Use useFormStatus for pending/loading state
     const { pending } = useFormStatus();
 
-    const emailErrors = findErrors("email", state?.errors);
-    const passwordErrors = findErrors("password", state?.errors);
-    const supabaseLoginErrors = findErrors("supabase_login", state?.errors);
+    // const emailErrors = findErrors("email", state?.errors);
+    // const passwordErrors = findErrors("password", state?.errors);
+    // const supabaseLoginErrors = findErrors("supabase_login", state?.errors);
+
+    const errors = {
+        email: findErrors("email", state?.errors),
+        password: findErrors("password", state?.errors),
+        supabase: findErrors("password", state?.errors)
+    }
 
     return (
             <form 
@@ -53,7 +59,7 @@ export default function Form({ action }: Props) {
                     name="email" 
                     className="mt-1"
                 />
-                <ErrorMessage errors={emailErrors} />
+                <ErrorMessage errors={errors.email} />
                 <div className="mt-5"></div>
                 <Label htmlFor="password">Password</Label>
                 <Input 
@@ -63,7 +69,7 @@ export default function Form({ action }: Props) {
                     name="password" 
                     className="mt-1" 
                 />
-                <ErrorMessage errors={passwordErrors} />
+                <ErrorMessage errors={errors.password} />
                 <Button 
                     className="mt-8" 
                     type="submit" 
@@ -72,7 +78,7 @@ export default function Form({ action }: Props) {
                 >
                     {pending ? 'Logging in...' : 'Login'}
                 </Button>
-                <ErrorMessage errors={supabaseLoginErrors} />
+                <ErrorMessage errors={errors.supabase} />
                 <Button 
                     className="mt-2"
                     type="submit" 

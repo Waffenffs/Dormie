@@ -29,13 +29,13 @@ const schema = z.object({
 // 1. Implement form validation for registration
 // ---> Maybe if mode "login" then fire login() and vice versa
 // 2. Handle errors after validation succeeds
-export async function authenticate(_prevState: any, formData: FormData) {
+export async function authenticate(_prevState: any, form_data: FormData) {
     const supabase = createClient();
 
     const validation = schema.safeParse({
-        email: formData.get('email'),
-        password: formData.get('password'),
-        mode: formData.get('mode')
+        email: form_data.get('email'),
+        password: form_data.get('password'),
+        mode: form_data.get('mode')
     })
 
     if (!validation.success) {

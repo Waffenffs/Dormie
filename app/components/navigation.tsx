@@ -5,8 +5,8 @@ import type { User } from "@supabase/supabase-js";
 import { logout } from "../(user)/actions";
 
 import ThemeSwitcherButton from "./button-themeswitcher";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function Navigation({ user }: { user: User | null }) {
     const handleLogout = async () => {
@@ -23,14 +23,14 @@ export default function Navigation({ user }: { user: User | null }) {
             </section>
             <section className="flex flex-row justify-center items-center gap-2">
                 <ThemeSwitcherButton />
-                {!user && 
-                    <Button asChild >
+                {
+                    user === null ?
+                    <Button asChild>
                         <Link href={'/login'}>Login / Register</Link>
                     </Button>
-                }
-                {user && 
-                    <Button 
-                        variant={"destructive"} 
+                    :
+                    <Button
+                        variant={"destructive"}
                         onClick={() => handleLogout()}
                     >Logout</Button>
                 }
