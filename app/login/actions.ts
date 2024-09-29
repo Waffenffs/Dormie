@@ -59,7 +59,7 @@ export async function authenticate(_prevState: any, form_data: FormData) {
         }
 
         revalidatePath('/', 'layout');
-        redirect('/feed');
+        redirect('/listings');
     } else if (validation.data.mode === "register") {
         const { error } = await supabase.auth.signUp({
             email: validation.data.email,

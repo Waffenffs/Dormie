@@ -37,7 +37,6 @@ export default function Form({ action }: Props) {
                 action={formAction} 
                 className="max-md:w-5/6 md:w-1/2 flex flex-col bg-card text-card-foreground max-md:rounded-[var(--radius)] p-10 border border-border drop-shadow-md"
             >
-                {/* To pass mode state */}
                 <input 
                     type="hidden" 
                     name="mode" 
@@ -46,7 +45,6 @@ export default function Form({ action }: Props) {
                 />
                 <section className="flex flex-col">
                     <Label className="text-xl md:text-2xl md:font-bold md:self-center">Sign in to Dormie</Label>
-                    {/* <Button variant={"outline"} className="mt-2 md:self-center md:px-10">Sign in with CvSU Gmail</Button> */}
                 </section>
 
                 <Separator className="my-10" />

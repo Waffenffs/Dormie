@@ -6,8 +6,8 @@ import Link from "next/link";
 
 export default function Hero() {
     return (
-        <section className="my-12 md:my-24">
-            <div className="max-w-xs md:max-w-xl flex flex-col gap-10 justify-start mx-3 max-md:text-center">
+        <section className="px-5">
+            <div className="flex flex-col gap-10 justify-start max-md:text-center md:w-1/2">
                 <h1 className="text-3xl md:text-5xl w-full tracking-tight font-bold max-md:text-center">
                     Student dormitories for {" "}
                     <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-green-600">CvSU - Main</span>{" "}
@@ -16,9 +16,9 @@ export default function Hero() {
 
                 <section className="flex flex-col gap-6">
                     <p className="text-lg tracking-normal">
-                        What started out as a mere idea by a freshman student at CvSU, 
-                        now having come into fruition with the goals of solving all your 
-                        problems with handling your student housing.
+                        What started out as an idea by a freshman student at CvSU, 
+                        now having come into reality with the goal of solving all your 
+                        problems with finding your ideal dormitory.
                     </p>
 
                     <Button asChild>

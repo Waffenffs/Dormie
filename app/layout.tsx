@@ -20,8 +20,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="overflow-x-hidden">
-        <ThemeProvider attribute="class" defaultTheme="light">
+      <body>
+        <ThemeProvider 
+          attribute="class" 
+          defaultTheme="light"
+        >
           {children}
           <Toaster />
         </ThemeProvider>
