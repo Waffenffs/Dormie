@@ -1,10 +1,10 @@
 ## Tech Stack
 
-- Next.js (Server Components and Server Actions)
-- Supabase (Auth & Storage)
-- ShadcnUI & Tailwind CSS (Styling)
-- Zod (Type-Safety and Data Validation)
-- Jest & Playwright (Testing)
+- Next.js — **Server Components and Server Actions**
+- Supabase — **Database, Auth & Storage**
+- ShadcnUI & Tailwind CSS — **Styling**
+- Zod — **Type-Safety and Data Validation**
+- Jest & Playwright — **Testing**
 
 ## Getting Started
 
@@ -35,5 +35,4 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 1. Login form isn't properly utilizing pending state (?)
 
 ### LATE-STAGE TODOS
-1. Create a supabase schema.sql file so that others can emulate the project's database
-2. Export database types to TypeScript for easier and smoother development
+1. Export database types to TypeScript for easier and smoother development
