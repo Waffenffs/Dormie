@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/supabase/server"
 
 import { Fragment } from "react";
-import ListingsPage from "./page"
+import ListingsPage from "./page";
 
 export const metadata: Metadata = {
     title: "Dormie - Listings",
@@ -27,7 +27,7 @@ export default async function ListingsLayout() {
 
     return (
         <Fragment>
-            <ListingsPage 
+            <ListingsPage
                 user={data?.user} 
                 role_initialized={userRoleData?.role_initialized} 
             />

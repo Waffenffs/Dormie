@@ -3,7 +3,7 @@
 import type { User } from "@supabase/supabase-js"
 import { useState, useEffect } from "react";
 
-import { submit_role } from "./actions";
+import { submit_role } from "../actions";
 import { wait } from "@/app/lib/utils";
 import { toast } from "sonner";
 
