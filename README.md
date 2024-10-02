@@ -4,7 +4,6 @@
 - Supabase — **Database, Auth & Storage**
 - ShadcnUI & Tailwind CSS — **Styling**
 - Zod — **Type-Safety and Data Validation**
-- Jest & Playwright — **Testing**
 
 ## Getting Started
 
