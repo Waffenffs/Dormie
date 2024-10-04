@@ -10,7 +10,7 @@ export const metadata: Metadata = {
     }
 }
 
-export default async function NewLoginLayout({ children }: React.PropsWithChildren) {
+export default async function LoginLayout({ children }: React.PropsWithChildren) {
     return (
         <Fragment>
             {children}

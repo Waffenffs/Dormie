@@ -32,7 +32,7 @@ const formSchema = z.object({
         .min(6, { message: "Password is too short." }),
 })
 
-export default function NewLoginPage() {
+export default function LoginPage() {
     const [mode, setMode] = useState<"login" | "register" | undefined>(undefined);
     const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
     const [pending, setPending] = useState(false);
