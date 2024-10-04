@@ -3,6 +3,8 @@ import type { Metadata } from "next"
 import { createClient } from "@/supabase/server"
 import { redirect } from "next/navigation"
 
+import { Fragment } from "react"
+
 export const metadata: Metadata = {
     title: "Dormie - Create Listing",
     authors: {
@@ -11,22 +13,20 @@ export const metadata: Metadata = {
     }
 }
 
-import { Fragment } from "react"
-
 export default async function CreateListingsLayout({ children }: React.PropsWithChildren) {
     const supabase = createClient();
 
-    const { data } = await supabase.auth.getUser();
-    if (data.user === null) {
+    const { data: userData } = await supabase.auth.getUser();
+    if (userData.user === null) {
         return redirect('/login');
     }
 
-    const { data: data_two } = await supabase
+    const { data: roleData } = await supabase
         .from('users')
         .select('role')
-        .eq('id', data.user.id)
+        .eq('id', userData.user.id)
         .single()
-    if (data_two?.role !== "owner") {
+    if (roleData?.role !== "owner") {
         return redirect('/listings/explore')
     }
     

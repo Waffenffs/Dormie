@@ -1,11 +1,6 @@
-import { createClient } from "@/supabase/server"
-
-import { authenticate } from "./actions"
-import { redirect } from "next/navigation"
+import { Fragment } from "react"
 
 import type { Metadata } from "next"
-
-import LoginPage from "./page"
 
 export const metadata: Metadata = {
     title: "Dormie - Login",
@@ -15,17 +10,10 @@ export const metadata: Metadata = {
     }
 }
 
-export default async function LoginLayout() {
-    const supabase = createClient();
-
-    const { data } = await supabase.auth.getUser();
-    if (data.user === null) {
-        return redirect('/listings/explore');
-    }
-
+export default async function NewLoginLayout({ children }: React.PropsWithChildren) {
     return (
-        <main className="w-screen h-screen flex max-md:justify-center max-md:items-center bg-muted">
-            <LoginPage action={authenticate} />
-        </main>
+        <Fragment>
+            {children}
+        </Fragment>
     )
 }

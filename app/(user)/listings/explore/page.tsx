@@ -34,7 +34,7 @@ export default function ListingsPage(props: ListingsPageProps) {
 
     useEffect(() => {
         if (!showRoleDialog) {
-            wait(2000).then(() => setShowRoleDialog(true));
+            wait(1000).then(() => setShowRoleDialog(true));
         }
     }, [])
 
