@@ -7,7 +7,7 @@
 
 ## Getting Started
 
-1. Clone the project
+1. Clone the project:
 ```bash
 git clone https://github.com/Waffenffs/Dormie.git
 ```

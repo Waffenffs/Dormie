@@ -24,7 +24,7 @@ export default function Hero() {
                     <Button asChild>
                         <Link 
                             className="self-center md:self-start px-4" 
-                            href={'/listings'}
+                            href={'/listings/explore'}
                         >
                             <ArrowRight />
                             Explore
