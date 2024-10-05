@@ -30,8 +30,5 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - File names should be kebab-cased
 - Component names should be CapitalCased
 
-### BUGS
-1. Login form isn't properly utilizing pending state (?)
-
-### LATE-STAGE TODOS
+### To-Dos:
 1. Export database types to TypeScript for easier and smoother development
