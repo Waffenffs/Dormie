@@ -2,14 +2,19 @@
 
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
+
 import { useForm } from "react-hook-form"
+import { useDropzone } from "react-dropzone"
+import { useState } from "react";
+
+import { uploadListing } from "./actions";
 
 import { Button } from "@/components/ui/button"
 import {
     Form,
     FormControl,
-    FormDescription,
     FormField,
+    FormDescription,
     FormItem,
     FormLabel,
     FormMessage
@@ -22,18 +27,20 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea";
 
 const dormSchema = z.object({
     type: z.string(),
-    monthly_price: z.number().max(6),
-    total_beds: z.number().max(2),
-    occupied_beds: z.number().max(2),
+    monthly_price: z.coerce.number().max(9999),
+    total_beds: z.coerce.number(),
+    occupied_beds: z.coerce.number(),
     title: z
         .string()
         .trim()
         .min(6, { message: "Title is too short." }),
     description: z.string().trim(),
 })
+export type dormSchema = z.infer<typeof dormSchema>;
 
 export default function CreateListings() {
     // **STORIES**
@@ -41,63 +48,171 @@ export default function CreateListings() {
     // 2. Develop the functionality for the form
     // 3. Develop the option to add images (LAST)
 
-    const form = useForm<z.infer<typeof dormSchema>>({
+    const [pending, setPending] = useState(false);
+
+    const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
+        noDrag: true,
+        accept: {
+            'image/png': ['.png']
+        }
+    })
+
+    const form = useForm<dormSchema>({
         resolver: zodResolver(dormSchema),
         defaultValues: {
             type: "shared"
         }
     })
 
-    async function onSubmit(values: z.infer<typeof dormSchema>) {
+    async function onSubmit(values: dormSchema) {
+        if (acceptedFiles.length >= 1) {
+            setPending(true);
+
+            try {
+                await uploadListing({...values}, acceptedFiles)
+            } catch (error) {
+                // Catch errors!
+            } finally {
+                setPending(false);
+            }
+        }
     }
 
     return (
-        <main className="bg-muted text-foreground flex justify-center items-center w-full h-full">
+        <main className="bg-gradient-to-br from-green-400 to-green-700 text-foreground flex justify-center items-center w-full h-full py-10">
             <Form {...form}>
                 <form
                     onSubmit={form.handleSubmit(onSubmit)}
-                    className="bg-background p-10 rounded-[var(--radius)] border border-border shadow-md grid grid-cols-2 gap-5"
+                    className="md:w-1/2 bg-background p-10 rounded-[var(--radius)] border border-border shadow-md flex flex-col gap-5"
                 >
-                    <FormField 
-                        control={form.control}
-                        name="type"
-                        render={({ field }) => (
-                            <FormItem className="mt-1">
-                                <FormLabel>Dorm Type</FormLabel>
-                                <Select
-                                    onValueChange={field.onChange}
-                                    {...field}
-                                >
+                    <div className="w-full grid grid-cols-2 gap-5">
+                        <FormField 
+                            control={form.control}
+                            name="type"
+                            render={({ field }) => (
+                                <FormItem className="mt-1">
+                                    <FormLabel>Dorm Type</FormLabel>
+                                    <Select
+                                        onValueChange={field.onChange}
+                                        {...field}
+                                    >
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select" />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="shared">Shared Dorm</SelectItem>
+                                            <SelectItem value="private">Private Dorm</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField 
+                            control={form.control}
+                            name="monthly_price"
+                            render={({ field }) => (
+                                <FormItem className="mt-1">
+                                    <FormLabel>Monthly Price</FormLabel>
                                     <FormControl>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Dorm Type" />
-                                        </SelectTrigger>
+                                        <Input
+                                            type="number"
+                                            min={0}
+                                            {...field}
+                                        />
                                     </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="shared">Shared Dorm</SelectItem>
-                                        <SelectItem value="private">Private Dorm</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    />
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField 
+                            control={form.control}
+                            name="total_beds"
+                            render={({ field }) => (
+                                <FormItem className="mt-1">
+                                    <FormLabel>Total Beds</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            min={0}
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                        <FormField 
+                            control={form.control}
+                            name="occupied_beds"
+                            render={({ field }) => (
+                                <FormItem className="mt-1">
+                                    <FormLabel>Occupied Beds</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            type="number"
+                                            {...field}
+                                        />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    </div>
                     <FormField 
                         control={form.control}
-                        name="monthly_price"
+                        name="title"
                         render={({ field }) => (
-                            <FormItem className="mt-1">
-                                <FormLabel>Monthly Price</FormLabel>
+                            <FormItem className="mt-1 flex-grow">
+                                <FormLabel>Dorm Name</FormLabel>
                                 <FormControl>
                                     <Input
-                                        type="number"
+                                        type="text"
+                                        min={0}
                                         {...field}
                                     />
                                 </FormControl>
+                                <FormDescription>
+                                    The name for your dorm should be concise.
+                                </FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
                     />
+                    <FormField 
+                        control={form.control}
+                        name="description"
+                        render={({ field }) => (
+                            <FormItem className="mt-1 flex-grow">
+                                <FormLabel>Dorm Description</FormLabel>
+                                <FormControl>
+                                    <Textarea
+                                        className="resize-none"
+                                        rows={15}
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormDescription>
+                                    You can include amenities, and other applicable items.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormItem>
+                        <FormLabel>Images</FormLabel>
+                        <section {...getRootProps({ className: 'border border-border flex justify-center items-center py-5 text-muted-foreground cursor-pointer' })}>
+                            <Input {...getInputProps()} />
+                            <span>Click here to select your image files</span>
+                        </section>
+                    </FormItem>
+                    <div className="flex justify-end items-center mt-8">
+                        <Button>
+                            Submit Dorm
+                        </Button>
+                    </div>
                 </form>
             </Form>
         </main>

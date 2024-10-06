@@ -31,13 +31,14 @@ const formSchema = z.object({
         .trim()
         .min(6, { message: "Password is too short." }),
 })
+export type formSchema = z.infer<typeof formSchema> 
 
 export default function LoginPage() {
     const [mode, setMode] = useState<"login" | "register" | undefined>(undefined);
     const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
     const [pending, setPending] = useState(false);
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm<formSchema>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: "",
@@ -45,12 +46,12 @@ export default function LoginPage() {
         }
     })
 
-    async function onSubmit(values: z.infer<typeof formSchema>) {
+    async function onSubmit(values: formSchema) {
         if (mode !== undefined) {
             setPending(true);
 
             try {
-                await authenticate(mode, values.email, values.password);
+                await authenticate(mode, {...values});
             } catch (error) {
                 if (error instanceof Error) {
                     setErrorMessage(error.message);

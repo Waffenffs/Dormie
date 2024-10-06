@@ -4,7 +4,10 @@ import { toast } from "sonner";
 
 import { createClient } from "@/supabase/server";
 
-export async function submit_role(user_role: "student" | "owner", user_id: string) {
+export async function submit_role(
+    user_role: "student" | "owner", 
+    user_id: string
+) {
     const supabase = createClient();
 
     const { error } = await supabase
