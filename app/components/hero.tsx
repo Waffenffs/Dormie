@@ -15,7 +15,7 @@ export default function Hero() {
                 </h1>
 
                 <section className="flex flex-col gap-6">
-                    <p className="text-lg tracking-normal">
+                    <p className="text-lg tracking-normal [text-shadow:_0_0_12px_rgb(0_0_0_/_100%)]">
                         What started out as an idea by a freshman student at CvSU, 
                         now having come into reality with the goal of solving all your 
                         problems with finding your ideal dormitory.
