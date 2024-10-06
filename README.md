@@ -25,10 +25,3 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-## Proposed Conventions
-- File names should be kebab-cased
-- Component names should be CapitalCased
-
-### To-Dos:
-1. Export database types to TypeScript for easier and smoother development
