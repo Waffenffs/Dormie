@@ -1,7 +1,9 @@
 'use server';
 
 import type { dormSchema } from "./page";
+
 import { FileWithPath } from "react-dropzone";
+import { v4 as uuidv4 } from 'uuid'
 
 import { createClient } from "@/supabase/server";
 
@@ -9,23 +11,14 @@ export async function uploadListing(
     values: dormSchema, 
     image_files: readonly FileWithPath[]
 ) {
-    // 1. Validate form data
-    // 2. Upload data to Supabase Database & Storage 
-
-    // IMAGES
-    // 1. Figure out how to upload them to Storage and listings_images database
-    // 2. fks are listing_id
-
-    // LATER: 
-    // 1. Compress images with CompressJS
-
     const supabase = createClient();
+    const listingId = uuidv4();
 
     const { data: userData } = await supabase.auth.getUser();
-
     const { error: listingUploadError } = await supabase
         .from('listings')
         .insert({
+            id: listingId,
             owner_id: userData.user?.id,
             ...values
         })
@@ -34,10 +27,35 @@ export async function uploadListing(
         throw new Error(listingUploadError.message);
     }
 
-    // image_files.forEach(async (file) => {
-    //     const { error: imageUploadError } = await supabase 
-    //         .storage
-    //         .from('images/listings')
-    //         .upload('', file)
-    // })
+    try {
+        image_files.forEach(async (file) => {
+            const imageUrl = `listings/listing_image${listingId}`
+
+            // TODO:
+            // 1. Compress image file size so we don't run out of storage (500mb MAX for free tier)
+            const { error: imageUploadError } = await supabase
+                .storage
+                .from('images')
+                .upload(imageUrl, file)
+
+            if (imageUploadError) {
+                throw new Error(imageUploadError.message);
+            }
+
+            const { error: imageDatabaseUploadError } = await supabase
+                .from('listings_images')
+                .insert({
+                    listing_id: listingId,
+                    image_url: imageUrl
+                })
+
+            if (imageDatabaseUploadError) {
+                throw new Error(imageDatabaseUploadError.message);
+            }
+        })
+    } catch (error) { 
+        throw error
+    }
+
+    return { success: true }
 }

@@ -51,6 +51,9 @@ export default function CreateListings() {
     const [pending, setPending] = useState(false);
     const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
 
+    // TODO:
+    // 1. Figure out a way to reset acceptedFiles
+    // ---> By creating a useState that stores acceptedFiles?
     const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
         noDrag: true,
         accept: {
@@ -69,7 +72,10 @@ export default function CreateListings() {
         setPending(true);
 
         try {
-            await uploadListing({...values}, acceptedFiles)
+            const result = await uploadListing({...values}, acceptedFiles)
+            if (result.success) {
+                form.reset();
+            }
         } catch (error) {
             if (error instanceof Error) {
                 setErrorMessage(error.message);
