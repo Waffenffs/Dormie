@@ -44,16 +44,17 @@ export type dormSchema = z.infer<typeof dormSchema>;
 
 export default function CreateListings() {
     // **STORIES**
-    // 1. Develop the general UI for the form
-    // 2. Develop the functionality for the form
-    // 3. Develop the option to add images (LAST)
+    // 1. Develop the general UI for the form - (DONE)
+    // 2. Develop the functionality for the form - (DONE)
+    // 3. Develop the option to add images (LAST) - IN-PROGRESS
 
     const [pending, setPending] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
 
     const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
         noDrag: true,
         accept: {
-            'image/png': ['.png']
+            'image/png': ['.png', '.jpeg']
         }
     })
 
@@ -65,17 +66,20 @@ export default function CreateListings() {
     })
 
     async function onSubmit(values: dormSchema) {
-        if (acceptedFiles.length >= 1) {
-            setPending(true);
+        setPending(true);
 
-            try {
-                await uploadListing({...values}, acceptedFiles)
-            } catch (error) {
-                // Catch errors!
-            } finally {
-                setPending(false);
+        try {
+            await uploadListing({...values}, acceptedFiles)
+        } catch (error) {
+            if (error instanceof Error) {
+                setErrorMessage(error.message);
             }
+        } finally {
+            setPending(false);
         }
+
+        // if (acceptedFiles.length >= 1) {
+        // }
     }
 
     return (
@@ -208,10 +212,11 @@ export default function CreateListings() {
                             <span>Click here to select your image files</span>
                         </section>
                     </FormItem>
-                    <div className="flex justify-end items-center mt-8">
-                        <Button>
+                    <div className="flex flex-col justify-end items-center mt-8">
+                        <Button disabled={pending}>
                             Submit Dorm
                         </Button>
+                        <div className="text-[0.8rem] text-destructive font-medium">{errorMessage}</div>
                     </div>
                 </form>
             </Form>
