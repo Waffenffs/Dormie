@@ -1,15 +1,20 @@
 'use client';
 
+import type { FileWithPath } from "react-dropzone";
+
 import { z } from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 
 import { useForm } from "react-hook-form"
 import { useDropzone } from "react-dropzone"
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { uploadListing } from "./actions";
 
-import { Upload as UploadIcon } from "lucide-react"
+import {
+    Upload as UploadIcon,
+    BadgeX as BadgeXIcon
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -28,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea";
 
@@ -45,6 +51,7 @@ const dormSchema = z.object({
 export type DormSchema = z.infer<typeof dormSchema>;
 
 export default function CreateListings() {
+    const [imageFiles, setImageFiles] = useState<FileWithPath[]>([]);
     const [pending, setPending] = useState(false);
     const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
 
@@ -56,6 +63,10 @@ export default function CreateListings() {
         maxFiles: 3
     })
 
+    useEffect(() => {
+        setImageFiles([...acceptedFiles]);
+    }, [acceptedFiles])
+
     const form = useForm<DormSchema>({
         resolver: zodResolver(dormSchema),
         defaultValues: {
@@ -64,11 +75,11 @@ export default function CreateListings() {
     })
 
     async function onSubmit(values: DormSchema) {
-        if (acceptedFiles.length >= 1) {
+        if (imageFiles.length >= 1) {
             setPending(true);
 
             const formData = new FormData();
-            acceptedFiles.forEach((file) => {
+            imageFiles.forEach((file) => {
                 formData.append('images', file, file.name);
             })
 
@@ -88,6 +99,14 @@ export default function CreateListings() {
             setErrorMessage("Expected at least more than 1 attached image file")
         }
     }
+
+    const ImagePreviewCards = imageFiles.map((file, index) => 
+        <ImagePreviewCard 
+            image={file} 
+            key={index} 
+            setImageFiles={setImageFiles}
+        />
+    )
 
     return (
         <main className="bg-gradient-to-br from-green-400 to-green-700 text-foreground flex justify-center items-center w-full h-full py-10">
@@ -221,6 +240,10 @@ export default function CreateListings() {
                         </section>
                         <FormDescription>Please attach at least 1 image file.</FormDescription>
                     </FormItem>
+                    <Label>Preview</Label>
+                    <section className="border border-border flex flex-col gap-7 justify-center items-center p-5 text-muted-foreground">
+                        {ImagePreviewCards}
+                    </section>
                     <div className="flex flex-col justify-end items-center mt-8">
                         <Button disabled={pending}>
                             Submit Dorm
@@ -230,5 +253,34 @@ export default function CreateListings() {
                 </form>
             </Form>
         </main>
+    )
+}
+
+function ImagePreviewCard({
+    image, 
+    setImageFiles
+}: {
+    image: FileWithPath;
+    setImageFiles: React.Dispatch<React.SetStateAction<FileWithPath[]>>
+}) {
+    const handleDeletion = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setImageFiles(prevState => prevState.filter((i) => i.path !== image.path))
+    }
+
+    return (
+        <div className="relative z-0">
+            <img 
+                className="rounded-[var(--radius)] w-full h-full"
+                src={URL.createObjectURL(image)} 
+            />
+            <Button 
+                className="rounded-full absolute -top-2 -right-3"
+                onClick={(e) => handleDeletion(e)} 
+                variant={"destructive"}
+            >
+                <BadgeXIcon />
+            </Button>
+        </div>
     )
 }

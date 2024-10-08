@@ -14,7 +14,7 @@ export default function Navigation({ user }: { user: User | null }) {
     }
 
     return (
-        <nav className="w-full flex justify-between items-center items-center py-2 px-4 bg-background/50 backdrop-blur-md sticky top-0">
+        <nav className="w-full flex justify-between items-center items-center py-2 px-4 bg-background/50 backdrop-blur-md sticky top-0 relative z-50">
             <section>
                 <Link 
                     href={"/"} 
