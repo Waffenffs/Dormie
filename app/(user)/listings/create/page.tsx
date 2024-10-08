@@ -89,10 +89,6 @@ export default function CreateListings() {
         }
     }
 
-    const files = acceptedFiles.map((file, index) => {
-        return <li key={index}>{file.path}</li>
-    })
-
     return (
         <main className="bg-gradient-to-br from-green-400 to-green-700 text-foreground flex justify-center items-center w-full h-full py-10">
             <Form {...form}>
