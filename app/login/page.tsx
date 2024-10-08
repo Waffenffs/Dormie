@@ -1,9 +1,10 @@
 'use client';
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { z } from "zod";
 
 import { authenticate } from "./actions";
 
@@ -31,14 +32,14 @@ const formSchema = z.object({
         .trim()
         .min(6, { message: "Password is too short." }),
 })
-export type formSchema = z.infer<typeof formSchema> 
+export type FormSchema = z.infer<typeof formSchema> 
 
 export default function LoginPage() {
     const [mode, setMode] = useState<"login" | "register" | undefined>(undefined);
     const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
     const [pending, setPending] = useState(false);
 
-    const form = useForm<formSchema>({
+    const form = useForm<FormSchema>({
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: "",
@@ -46,7 +47,7 @@ export default function LoginPage() {
         }
     })
 
-    async function onSubmit(values: formSchema) {
+    async function onSubmit(values: FormSchema) {
         if (mode !== undefined) {
             setPending(true);
 

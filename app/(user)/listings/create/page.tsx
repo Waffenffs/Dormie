@@ -40,53 +40,54 @@ const dormSchema = z.object({
         .min(6, { message: "Title is too short." }),
     description: z.string().trim(),
 })
-export type dormSchema = z.infer<typeof dormSchema>;
+export type DormSchema = z.infer<typeof dormSchema>;
 
 export default function CreateListings() {
-    // **STORIES**
-    // 1. Develop the general UI for the form - (DONE)
-    // 2. Develop the functionality for the form - (DONE)
-    // 3. Develop the option to add images (LAST) - IN-PROGRESS
-
     const [pending, setPending] = useState(false);
     const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
 
-    // TODO:
-    // 1. Figure out a way to reset acceptedFiles
-    // ---> By creating a useState that stores acceptedFiles?
     const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
         noDrag: true,
         accept: {
             'image/png': ['.png', '.jpeg']
-        }
+        },
+        maxFiles: 3
     })
 
-    const form = useForm<dormSchema>({
+    const form = useForm<DormSchema>({
         resolver: zodResolver(dormSchema),
         defaultValues: {
             type: "shared"
         }
     })
 
-    async function onSubmit(values: dormSchema) {
-        setPending(true);
+    async function onSubmit(values: DormSchema) {
+        if (acceptedFiles.length > 1) {
+            setPending(true);
 
-        try {
-            const result = await uploadListing({...values}, acceptedFiles)
-            if (result.success) {
-                form.reset();
+            const formData = new FormData();
+            acceptedFiles.forEach((file) => {
+                formData.append('images', file, file.name);
+            })
+
+            try {
+                const result = await uploadListing({...values}, formData);
+                if (result.success) {
+                    form.reset();
+                }
+            } catch (error) {
+                if (error instanceof Error) {
+                    setErrorMessage(error.message);
+                }
+            } finally {
+                setPending(false);
             }
-        } catch (error) {
-            if (error instanceof Error) {
-                setErrorMessage(error.message);
-            }
-        } finally {
-            setPending(false);
         }
-
-        // if (acceptedFiles.length >= 1) {
-        // }
     }
+
+    const files = acceptedFiles.map((file, index) => {
+        return <li key={index}>{file.path}</li>
+    })
 
     return (
         <main className="bg-gradient-to-br from-green-400 to-green-700 text-foreground flex justify-center items-center w-full h-full py-10">
@@ -211,12 +212,68 @@ export default function CreateListings() {
                             </FormItem>
                         )}
                     />
+                    {/* <FormField 
+                        control={form.control}
+                        name="files"
+                        render={({ field: { value, onChange, ...fieldProps } }) => (
+                            <FormItem className="mt-1 flex-grow">
+                                <FormLabel>Images</FormLabel>
+                                <FormControl>
+                                    <Input
+                                        {...fieldProps}
+                                        type="file"
+                                        onChange={(event) => {
+                                            const files = event.target.files;
+                                            if (files) {
+                                                onChange(Array.from(files))
+                                            }
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormDescription>
+                                    Please submit at least 3 images for best viewing.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    /> */}
+                    {/* <FormField 
+                        control={form.control}
+                        name="file"
+                        render={({ field }) => (
+                            <FormItem className="mt-1 flex-grow">
+                                <FormLabel>Images</FormLabel>
+                                <FormControl>
+                                    <Input 
+                                        type="file"
+                                        name="file"
+                                        {...field}
+                                    />
+                                </FormControl>
+                                <FormDescription>
+                                    You can include amenities, and other applicable items.
+                                </FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    /> */}
+                    {/* <FormItem>
+                        <FormLabel>Images</FormLabel>
+                        <Input
+                            type="file"
+                            name="file"
+                            {...getInputProps()}
+                        />
+                    </FormItem> */}
                     <FormItem>
                         <FormLabel>Images</FormLabel>
                         <section {...getRootProps({ className: 'border border-border flex justify-center items-center py-5 text-muted-foreground cursor-pointer' })}>
                             <Input {...getInputProps()} />
                             <span>Click here to select your image files</span>
                         </section>
+                        <aside>
+                            {files}
+                        </aside>
                     </FormItem>
                     <div className="flex flex-col justify-end items-center mt-8">
                         <Button disabled={pending}>

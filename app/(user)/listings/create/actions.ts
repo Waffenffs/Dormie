@@ -1,17 +1,15 @@
 'use server';
 
-import type { dormSchema } from "./page";
+import type { DormSchema } from './page';
 
-import { FileWithPath } from "react-dropzone";
 import { v4 as uuidv4 } from 'uuid'
 
 import { createClient } from "@/supabase/server";
 
-export async function uploadListing(
-    values: dormSchema, 
-    image_files: readonly FileWithPath[]
-) {
+// FormData has to be passed over.
+export async function uploadListing(values: DormSchema, formData: FormData) {
     const supabase = createClient();
+    const imageFiles = formData.getAll('images')
     const listingId = uuidv4();
 
     const { data: userData } = await supabase.auth.getUser();
@@ -28,14 +26,12 @@ export async function uploadListing(
     }
 
     try {
-        image_files.forEach(async (file) => {
-            const imageUrl = `listings/listing_image${listingId}`
+        imageFiles.forEach(async (file) => {
+            const imageUrl = `listing_image_${uuidv4()}`
 
-            // TODO:
-            // 1. Compress image file size so we don't run out of storage (500mb MAX for free tier)
             const { error: imageUploadError } = await supabase
                 .storage
-                .from('images')
+                .from('/images/listings')
                 .upload(imageUrl, file)
 
             if (imageUploadError) {
