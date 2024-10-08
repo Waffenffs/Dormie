@@ -8,9 +8,9 @@ import { wait } from "@/app/lib/utils";
 import { toast } from "sonner";
 
 import {
-    Building2, 
-    BookOpen, 
-    Check
+    Building2 as Building2Icon, 
+    BookOpen as BookOpenIcon, 
+    Check as CheckIcon
 } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import {
@@ -74,14 +74,14 @@ export default function ListingsPage(props: ListingsPageProps) {
                             className={`w-1/2 h-32 transition duration-150 cursor-pointer hover:bg-muted flex flex-col gap-2 justify-center items-center rounded-[var(--radius)] border ${selected === "student" ? 'border-primary bg-muted' : 'border-border'}`}
                             onClick={() => setSelected("student")}
                         >
-                            <BookOpen />
+                            <BookOpenIcon />
                             <h1>Student</h1>
                         </div>
                         <div
                             className={`w-1/2 h-32 transition duration-150 cursor-pointer hover:bg-muted flex flex-col gap-2 justify-center items-center rounded-[var(--radius)] border ${selected === "owner" ? 'border-primary bg-muted' : 'border-border'}`}
                             onClick={() => setSelected("owner")}
                         >
-                            <Building2 />
+                            <Building2Icon />
                             <h1>Owner</h1>
                         </div>
                     </section>
@@ -90,7 +90,7 @@ export default function ListingsPage(props: ListingsPageProps) {
                             className="flex flex-row items-center gap-1" 
                             onClick={() => handleRoleSubmit()}
                         >
-                            <Check />
+                            <CheckIcon />
                             Complete
                         </Button>
                     </DialogFooter>

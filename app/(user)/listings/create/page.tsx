@@ -9,6 +9,8 @@ import { useState } from "react";
 
 import { uploadListing } from "./actions";
 
+import { Upload as UploadIcon } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 import {
     Form,
@@ -62,7 +64,7 @@ export default function CreateListings() {
     })
 
     async function onSubmit(values: DormSchema) {
-        if (acceptedFiles.length > 1) {
+        if (acceptedFiles.length >= 1) {
             setPending(true);
 
             const formData = new FormData();
@@ -82,6 +84,8 @@ export default function CreateListings() {
             } finally {
                 setPending(false);
             }
+        } else {
+            setErrorMessage("Expected at least more than 1 attached image file")
         }
     }
 
@@ -212,68 +216,14 @@ export default function CreateListings() {
                             </FormItem>
                         )}
                     />
-                    {/* <FormField 
-                        control={form.control}
-                        name="files"
-                        render={({ field: { value, onChange, ...fieldProps } }) => (
-                            <FormItem className="mt-1 flex-grow">
-                                <FormLabel>Images</FormLabel>
-                                <FormControl>
-                                    <Input
-                                        {...fieldProps}
-                                        type="file"
-                                        onChange={(event) => {
-                                            const files = event.target.files;
-                                            if (files) {
-                                                onChange(Array.from(files))
-                                            }
-                                        }}
-                                    />
-                                </FormControl>
-                                <FormDescription>
-                                    Please submit at least 3 images for best viewing.
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    /> */}
-                    {/* <FormField 
-                        control={form.control}
-                        name="file"
-                        render={({ field }) => (
-                            <FormItem className="mt-1 flex-grow">
-                                <FormLabel>Images</FormLabel>
-                                <FormControl>
-                                    <Input 
-                                        type="file"
-                                        name="file"
-                                        {...field}
-                                    />
-                                </FormControl>
-                                <FormDescription>
-                                    You can include amenities, and other applicable items.
-                                </FormDescription>
-                                <FormMessage />
-                            </FormItem>
-                        )}
-                    /> */}
-                    {/* <FormItem>
-                        <FormLabel>Images</FormLabel>
-                        <Input
-                            type="file"
-                            name="file"
-                            {...getInputProps()}
-                        />
-                    </FormItem> */}
                     <FormItem>
                         <FormLabel>Images</FormLabel>
-                        <section {...getRootProps({ className: 'border border-border flex justify-center items-center py-5 text-muted-foreground cursor-pointer' })}>
+                        <section {...getRootProps({ className: 'border border-border flex flex-col gap-2 justify-center items-center py-5 text-muted-foreground cursor-pointer' })}>
                             <Input {...getInputProps()} />
+                            <UploadIcon />
                             <span>Click here to select your image files</span>
                         </section>
-                        <aside>
-                            {files}
-                        </aside>
+                        <FormDescription>Please attach at least 1 image file.</FormDescription>
                     </FormItem>
                     <div className="flex flex-col justify-end items-center mt-8">
                         <Button disabled={pending}>
