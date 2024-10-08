@@ -6,11 +6,10 @@ import { v4 as uuidv4 } from 'uuid'
 
 import { createClient } from "@/supabase/server";
 
-// FormData has to be passed over.
 export async function uploadListing(values: DormSchema, formData: FormData) {
     const supabase = createClient();
-    const imageFiles = formData.getAll('images')
     const listingId = uuidv4();
+    const imageFiles = formData.getAll('images')
 
     const { data: userData } = await supabase.auth.getUser();
     const { error: listingUploadError } = await supabase
@@ -50,7 +49,7 @@ export async function uploadListing(values: DormSchema, formData: FormData) {
             }
         })
     } catch (error) { 
-        throw error
+        throw error // Catch and throw it again so client components can catch it
     }
 
     return { success: true }

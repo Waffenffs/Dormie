@@ -4,11 +4,11 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/supabase/server";
 
-import type { formSchema } from "./page";
+import type { FormSchema } from "./page";
 
 export async function authenticate(
     mode: "login" | "register", 
-    values: formSchema
+    values: FormSchema
 ) {
     const supabase = createClient();
 
