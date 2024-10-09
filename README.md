@@ -1,3 +1,5 @@
+# Welcome to [Dormie](https://github.com/Waffenffs/Dormie/)!
+
 ## Tech Stack
 
 - Next.js — **Server Components and Server Actions**
@@ -25,12 +27,3 @@ npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-### TODOS
-1. Find a way to upload files with Server Actions (DONE)
-2. Find a way to reset acceptedFiles on submit
----> Could just make it so that after submission, they get redirected to their listing's URL
-3. Figure out a way to compress images on the client/server
-
-### SMALLER TODOS
-1. Add an error message for when user picks more than 3 images
