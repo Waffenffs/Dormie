@@ -1,3 +1,5 @@
+# Welcome to [Dormie](https://github.com/Waffenffs/Dormie/)!
+
 ## Tech Stack
 
 - Next.js — **Server Components and Server Actions**
