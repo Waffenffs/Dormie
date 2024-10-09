@@ -15,9 +15,11 @@ import { uploadListing } from "./actions";
 
 import {
     Upload as UploadIcon,
-    BadgeX as BadgeXIcon
+    BadgeX as BadgeXIcon,
+    Check as CheckIcon
 } from "lucide-react";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
     Form,
@@ -53,9 +55,12 @@ const dormSchema = z.object({
 export type DormSchema = z.infer<typeof dormSchema>;
 
 export default function CreateListings() {
+    // RHF's acceptedFiles property is immutable
+    // This is a workaround to mutate it
     const [imageFiles, setImageFiles] = useState<FileWithPath[]>([]);
     const [pending, setPending] = useState(false);
     const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
+    const [submitted, setSubmitted] = useState(false);
 
     const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
         noDrag: true,
@@ -95,7 +100,10 @@ export default function CreateListings() {
 
                 const result = await uploadListing({...values}, formData);
                 if (result.success) {
+                    toast.success("Successfully created a dorm listing! Redirecting you...")
                     form.reset();
+                    setImageFiles([]);
+                    setSubmitted(true);
                 }
             } catch (error) {
                 if (error instanceof Error) {
@@ -253,10 +261,17 @@ export default function CreateListings() {
                     <section className="border border-border flex flex-col gap-7 justify-center items-center p-5 text-muted-foreground">
                         {ImagePreviewCards}
                     </section>
-                    <div className="flex flex-col justify-end items-center mt-8">
-                        <Button disabled={pending}>
-                            Submit Dorm
-                        </Button>
+                    <div className="flex flex-col mt-8">
+                        <div className={`flex-grow self-end ${submitted && "hover:cursor-not-allowed"}`}>
+                            <Button 
+                                className="flex flex-row gap-1 items-center transition duration-300"
+                                type="submit"
+                                disabled={pending || submitted}
+                            >
+                                {submitted && <CheckIcon />}
+                                Submit Dorm
+                            </Button>
+                        </div>
                         <div className="text-[0.8rem] text-destructive font-medium">{errorMessage}</div>
                     </div>
                 </form>
