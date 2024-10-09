@@ -2,21 +2,23 @@
 
 import type { FileWithPath } from "react-dropzone";
 
-import { z } from "zod"
-import { zodResolver } from "@hookform/resolvers/zod"
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-import { useForm } from "react-hook-form"
-import { useDropzone } from "react-dropzone"
+import { useForm } from "react-hook-form";
+import { useDropzone } from "react-dropzone";
 import { useState, useEffect } from "react";
+
+import imageCompression from "browser-image-compression";
 
 import { uploadListing } from "./actions";
 
 import {
     Upload as UploadIcon,
     BadgeX as BadgeXIcon
-} from "lucide-react"
+} from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
@@ -25,16 +27,16 @@ import {
     FormItem,
     FormLabel,
     FormMessage
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input"
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 const dormSchema = z.object({
@@ -79,11 +81,18 @@ export default function CreateListings() {
             setPending(true);
 
             const formData = new FormData();
-            imageFiles.forEach((file) => {
-                formData.append('images', file, file.name);
-            })
+
+            const imageCompressionOptions = {
+                maxSizeMB: 1,
+                maxWidthOrHeight: 1920,
+            }
 
             try {
+                for (const file of imageFiles) {
+                    const compressedImage = await imageCompression(file, imageCompressionOptions);
+                    formData.append('images', compressedImage, compressedImage.name);
+                }
+
                 const result = await uploadListing({...values}, formData);
                 if (result.success) {
                     form.reset();
