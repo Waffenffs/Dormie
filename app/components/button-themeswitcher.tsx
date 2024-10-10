@@ -3,6 +3,7 @@
 import { useTheme } from "next-themes";
 
 import { SunIcon, MoonIcon } from "lucide-react" 
+
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,12 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
-// TODO
 export default function ThemeSwitcherButton() {
-    const { theme, setTheme } = useTheme();
-
-    // sun dark:hidden
-    // moon hidden dark:visible
+    const { setTheme } = useTheme();
 
     return (
     <DropdownMenu>
