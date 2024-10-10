@@ -12,15 +12,24 @@ import { useState, useEffect } from "react";
 import imageCompression from "browser-image-compression";
 
 import { uploadListing } from "./actions";
+import { AMENITIES } from "@/app/lib/constants";
 
 import {
     Upload as UploadIcon,
     BadgeX as BadgeXIcon,
-    Check as CheckIcon
+    Check as CheckIcon,
+    X as XIcon
 } from "lucide-react";
 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import {
+    Command,
+    CommandEmpty,
+    CommandInput,
+    CommandList,
+    CommandItem,
+} from "@/components/ui/command"
 import {
     Form,
     FormControl,
@@ -46,6 +55,10 @@ const dormSchema = z.object({
     monthly_price: z.coerce.number().max(9999),
     total_beds: z.coerce.number(),
     occupied_beds: z.coerce.number(),
+    amenities: z
+        .string()
+        .array()
+        .nonempty({ message: "At least one amenity must be included." }),
     title: z
         .string()
         .trim()
@@ -55,12 +68,11 @@ const dormSchema = z.object({
 export type DormSchema = z.infer<typeof dormSchema>;
 
 export default function CreateListings() {
-    // RHF's acceptedFiles property is immutable
-    // This is a workaround to mutate it
-    const [imageFiles, setImageFiles] = useState<FileWithPath[]>([]);
     const [pending, setPending] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
     const [submitted, setSubmitted] = useState(false);
+    // RHF's (react-hook-form) acceptedFiles property is immutable
+    // The imageFiles state is a workaround for us to be able mutate it
+    const [imageFiles, setImageFiles] = useState<FileWithPath[]>([]);
 
     const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
         noDrag: true,
@@ -85,14 +97,14 @@ export default function CreateListings() {
         if (imageFiles.length >= 1) {
             setPending(true);
 
-            const formData = new FormData();
-
-            const imageCompressionOptions = {
-                maxSizeMB: 1,
-                maxWidthOrHeight: 1920,
-            }
-
             try {
+                const formData = new FormData();
+
+                const imageCompressionOptions = {
+                    maxSizeMB: 1,
+                    maxWidthOrHeight: 1920,
+                }
+
                 for (const file of imageFiles) {
                     const compressedImage = await imageCompression(file, imageCompressionOptions);
                     formData.append('images', compressedImage, compressedImage.name);
@@ -100,30 +112,32 @@ export default function CreateListings() {
 
                 const result = await uploadListing({...values}, formData);
                 if (result.success) {
-                    toast.success("Successfully created a dorm listing! Redirecting you...")
-                    form.reset();
+                    toast.success("Successfully created a dorm listing! We are shortly redirecting you...")
+                    // We have to do this manually because RHF is dumbo
+                    form.reset({
+                        type: "",
+                        monthly_price: 0,
+                        total_beds: 0,
+                        occupied_beds: 0,
+                        amenities: [],
+                        title: "",
+                        description: ""
+                    })
                     setImageFiles([]);
                     setSubmitted(true);
                 }
             } catch (error) {
+                console.error(error);
                 if (error instanceof Error) {
-                    setErrorMessage(error.message);
+                    toast.error(error.message)
                 }
             } finally {
                 setPending(false);
             }
         } else {
-            setErrorMessage("Expected at least more than 1 attached image file")
+            toast.error('Expected at least more than 1 attached image file')
         }
     }
-
-    const ImagePreviewCards = imageFiles.map((file, index) => 
-        <ImagePreviewCard 
-            image={file} 
-            key={index} 
-            setImageFiles={setImageFiles}
-        />
-    )
 
     return (
         <main className="bg-gradient-to-br from-green-400 to-green-700 text-foreground flex justify-center items-center w-full h-full py-10">
@@ -210,6 +224,58 @@ export default function CreateListings() {
                     </div>
                     <FormField 
                         control={form.control}
+                        name="amenities"
+                        render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Amenities</FormLabel>
+                                <div className="flex flex-row gap-2 w-full overflow-x-auto">
+                                    {Array.isArray(field.value) && (
+                                        field.value?.map((amenity) => (
+                                            <div className="flex flex-row gap-2 items-center rounded-[var(--radius)] border border-border py-1 px-3 text-sm font-semibold tracking-wide hover:bg-muted transition duration-300">
+                                                <span>Includes {amenity}</span>
+                                                <XIcon 
+                                                    className="hover:cursor-pointer hover:text-red-500"
+                                                    onClick={() => {
+                                                        const filteredAmenities = field.value?.filter((thisAmenity) => thisAmenity !== amenity);
+                                                        field.onChange(filteredAmenities);
+                                                    }}
+                                                    size={15} 
+                                                />
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+
+                                <div className="flex flex-row w-full rounded-[var(--radius)] border border-border p-4 overflow-x-auto">
+                                    <Command>
+                                        <CommandInput placeholder="Enter an amenity here..." />
+                                        <CommandList>
+                                            <CommandEmpty>No such amenities found.</CommandEmpty>
+                                            {AMENITIES.map((amenity) => !field.value?.includes(amenity) && 
+                                                 <CommandItem 
+                                                    key={amenity}
+                                                    value={amenity}
+                                                    onSelect={(currentValue) => {
+                                                        if (Array.isArray(field.value)) {
+                                                            const selectedAmenities = [...field.value, currentValue];
+                                                            field.onChange(selectedAmenities);
+                                                        } else {
+                                                            // Initialize so we can map over field.value
+                                                            field.onChange([currentValue]);
+                                                        }
+                                                    }}
+                                                >{amenity}</CommandItem>                                       
+                                            )}
+                                        </CommandList>
+                                    </Command>
+                                </div>
+                                <FormDescription>What amenities does your dorm include? Please select from our given options.</FormDescription>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField 
+                        control={form.control}
                         name="title"
                         render={({ field }) => (
                             <FormItem className="mt-1 flex-grow">
@@ -242,7 +308,7 @@ export default function CreateListings() {
                                     />
                                 </FormControl>
                                 <FormDescription>
-                                    You can include amenities, and other applicable items.
+                                    Let them know more about your dorm like the rules, curfews, etc.
                                 </FormDescription>
                                 <FormMessage />
                             </FormItem>
@@ -259,7 +325,31 @@ export default function CreateListings() {
                     </FormItem>
                     <Label>Preview</Label>
                     <section className="border border-border flex flex-col gap-7 justify-center items-center p-5 text-muted-foreground">
-                        {ImagePreviewCards}
+                        {imageFiles.map((file, index) => {
+                            const handleDeletion = (e: React.MouseEvent) => {
+                                e.preventDefault();
+                                setImageFiles(prevState => prevState.filter((i) => i.path !== file.path))
+                            }
+
+                            return (
+                                <div 
+                                    key={index} 
+                                    className="relative z-0"
+                                >
+                                    <img 
+                                        className="rounded-[var(--radius)] w-full h-full"
+                                        src={URL.createObjectURL(file)} 
+                                    />
+                                    <Button 
+                                        className="rounded-full absolute -top-2 -right-3"
+                                        onClick={(e) => handleDeletion(e)} 
+                                        variant={"destructive"}
+                                    >
+                                        <BadgeXIcon />
+                                    </Button>
+                                </div>
+                            )
+                        })}
                     </section>
                     <div className="flex flex-col mt-8">
                         <div className={`flex-grow self-end ${submitted && "hover:cursor-not-allowed"}`}>
@@ -272,39 +362,9 @@ export default function CreateListings() {
                                 Submit Dorm
                             </Button>
                         </div>
-                        <div className="text-[0.8rem] text-destructive font-medium">{errorMessage}</div>
                     </div>
                 </form>
             </Form>
         </main>
-    )
-}
-
-function ImagePreviewCard({
-    image, 
-    setImageFiles
-}: {
-    image: FileWithPath;
-    setImageFiles: React.Dispatch<React.SetStateAction<FileWithPath[]>>
-}) {
-    const handleDeletion = (e: React.MouseEvent) => {
-        e.preventDefault();
-        setImageFiles(prevState => prevState.filter((i) => i.path !== image.path))
-    }
-
-    return (
-        <div className="relative z-0">
-            <img 
-                className="rounded-[var(--radius)] w-full h-full"
-                src={URL.createObjectURL(image)} 
-            />
-            <Button 
-                className="rounded-full absolute -top-2 -right-3"
-                onClick={(e) => handleDeletion(e)} 
-                variant={"destructive"}
-            >
-                <BadgeXIcon />
-            </Button>
-        </div>
     )
 }
