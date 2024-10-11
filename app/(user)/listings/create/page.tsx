@@ -15,10 +15,12 @@ import { uploadListing } from "./actions";
 import { AMENITIES } from "@/app/lib/constants";
 
 import {
-    Upload as UploadIcon,
+    BadgeMinus as BadgeMinusIcon,
     BadgeX as BadgeXIcon,
+    Upload as UploadIcon,
     Check as CheckIcon,
-    X as XIcon
+    Plus as PlusIcon,
+    X as XIcon,
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -49,12 +51,13 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Separator } from "@/components/ui/separator";
 
 const dormSchema = z.object({
     type: z.string(),
     monthly_price: z.coerce.number().max(9999),
-    total_beds: z.coerce.number(),
-    occupied_beds: z.coerce.number(),
+    // total_beds: z.coerce.number(),
+    // occupied_beds: z.coerce.number(),
     amenities: z
         .string()
         .array()
@@ -67,9 +70,22 @@ const dormSchema = z.object({
 })
 export type DormSchema = z.infer<typeof dormSchema>;
 
+type Room = {
+    room_name: string;
+    total_beds: number;
+    occupied_beds: number;
+}
+
 export default function CreateListings() {
     const [pending, setPending] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [rooms, setRooms] = useState<Room[]>([
+        {
+            room_name: "Room 1",
+            total_beds: 0,
+            occupied_beds: 0
+        }
+    ]);
     // RHF's (react-hook-form) acceptedFiles property is immutable
     // The imageFiles state is a workaround for us to be able mutate it
     const [imageFiles, setImageFiles] = useState<FileWithPath[]>([]);
@@ -113,12 +129,12 @@ export default function CreateListings() {
                 const result = await uploadListing({...values}, formData);
                 if (result.success) {
                     toast.success("Successfully created a dorm listing! We are shortly redirecting you...")
-                    // We have to do this manually because RHF is dumbo
+                    // We have to do this manually because RHF is the worst library of all time
                     form.reset({
                         type: "",
                         monthly_price: 0,
-                        total_beds: 0,
-                        occupied_beds: 0,
+                        // total_beds: 0,
+                        // occupied_beds: 0,
                         amenities: [],
                         title: "",
                         description: ""
@@ -188,39 +204,72 @@ export default function CreateListings() {
                                 </FormItem>
                             )}
                         />
-                        <FormField 
-                            control={form.control}
-                            name="total_beds"
-                            render={({ field }) => (
-                                <FormItem className="mt-1">
-                                    <FormLabel>Total Beds</FormLabel>
-                                    <FormControl>
-                                        <Input
-                                            type="number"
-                                            min={0}
-                                            {...field}
+                    </div>
+                    <Label>Rooms</Label>
+                    <div className="flex flex-col gap-4 items-center rounded-[var(--radius)] border border-border p-6 bg-muted">
+                        {rooms.map((room, index) => (
+                            <article key={index} className="w-full p-3 border border-border rounded-[var(--radius)] shadow-md bg-background">
+                                <h3 className="text-md font-medium leading-none flex justify-between items-center w-full">
+                                    <span>{room.room_name}</span>
+                                    {rooms.length > 1 && (
+                                        <BadgeMinusIcon 
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                const filteredRooms = rooms
+                                                    .filter((_, thisIndex) => thisIndex !== index)
+                                                    .map((room, thisIndex) => ({
+                                                        ...room ,
+                                                        room_name: `Room ${thisIndex + 1}`
+                                                    }));
+                                                setRooms(filteredRooms);
+                                            }}
+                                            className="hover:cursor-pointer hover:text-red-500 transition duration-300" 
                                         />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                        <FormField 
-                            control={form.control}
-                            name="occupied_beds"
-                            render={({ field }) => (
-                                <FormItem className="mt-1">
-                                    <FormLabel>Occupied Beds</FormLabel>
-                                    <FormControl>
-                                        <Input
+                                    )}
+                                </h3>
+                                <Separator className="my-2" />
+                                <div className="w-full flex justify-row gap-5 items-center">
+                                    <div className="flex flex-col gap-1 items-center w-1/2">
+                                        <Label>Total Beds</Label>
+                                        <Input 
+                                            value={room.total_beds}
+                                            onChange={(e) => {
+                                                const newRooms = [...rooms];
+                                                newRooms[index] = {...room, total_beds: parseInt(e.target.value)};
+                                                setRooms(newRooms);
+                                            }}
                                             type="number"
-                                            {...field}
                                         />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
+                                    </div>
+                                    <div className="flex flex-col gap-1 items-center w-1/2">
+                                        <Label>Occupied Beds</Label>
+                                        <Input 
+                                            value={room.occupied_beds}
+                                            onChange={(e) => {
+                                                const newRooms = [...rooms];
+                                                newRooms[index] = {...room, occupied_beds: parseInt(e.target.value)};
+                                                setRooms(newRooms);
+                                            }}
+                                            type="number"
+                                        />
+                                    </div>
+                                </div>
+                            </article>
+                        ))}
+                        <Button 
+                            onClick={(e) => {
+                                e.preventDefault();
+                                setRooms((prevState) => [...prevState, {
+                                    room_name: `Room ${prevState.length + 1}`,
+                                    total_beds: 0,
+                                    occupied_beds: 0
+                                }])
+                            }}
+                            className="flex flex-row items-center gap-1 self-end"
+                        >
+                            <span>Add Room</span>
+                            <PlusIcon />
+                        </Button>
                     </div>
                     <FormField 
                         control={form.control}
