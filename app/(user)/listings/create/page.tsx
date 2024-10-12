@@ -48,20 +48,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger
+} from "@/components/ui/popover"
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 
+// FIXME:
+// 1. Display the appropriate error message for rooms.
 const dormSchema = z.object({
-    type: z.string(),
+    type: z
+        .string()
+        .refine((val) => val === "private" || val === "shared", { message: "Invalid type." }),
     monthly_price: z.coerce.number().max(9999),
     rooms: z
         .array(
             z.object({
-                room_name: z.string().trim(),
-                total_beds: z.coerce.number(),
-                occupied_beds: z.coerce.number(),
+                name: z.string().trim(),
+                total_beds: z.coerce.number().int(),
+                occupied_beds: z.coerce.number().int(),
             }).refine((props) => 
                 props.occupied_beds <= props.total_beds, 
                 { message: "Occupied beds can't exceed total beds." }
@@ -79,10 +88,10 @@ const dormSchema = z.object({
 })
 export type DormSchema = z.infer<typeof dormSchema>;
 
-// TODO: 1. Add popover when renaming dorms
 export default function CreateListings() {
     const [pending, setPending] = useState(false);
     const [submitted, setSubmitted] = useState(false);
+    const [changeDormName, setChangeDormName] = useState<string>("");
     // RHF's (react-hook-form) acceptedFiles property is immutable
     // The imageFiles state is a workaround for us to be able mutate it
     const [imageFiles, setImageFiles] = useState<FileWithPath[]>([]);
@@ -103,13 +112,18 @@ export default function CreateListings() {
         resolver: zodResolver(dormSchema),
         defaultValues: {
             type: "shared",
-            rooms: [{ total_beds: 0, occupied_beds: 0 }]
+            monthly_price: 0,
+            rooms: [{ 
+                name: "Room 1",
+                total_beds: 0, 
+                occupied_beds: 0
+            }]
         }
     })
 
-    const { control } = form;
+    const { control, formState: { errors } } = form;
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove, update } = useFieldArray({
         control,
         name: "rooms"
     })
@@ -136,10 +150,11 @@ export default function CreateListings() {
                     toast.success("Successfully created a dorm listing! We are shortly redirecting you...")
                     // We have to do this manually because RHF is the worst library of all time
                     form.reset({
-                        type: "",
+                        type: "shared",
                         monthly_price: 0,
                         amenities: [],
                         rooms: [{
+                            name: "Room 1",
                             total_beds: 0,
                             occupied_beds: 0
                         }],
@@ -220,7 +235,40 @@ export default function CreateListings() {
                                 className="w-full p-3 border border-border rounded-[var(--radius)] shadow-md bg-background"
                             >
                                 <h3 className="text-md font-medium leading-none flex justify-between items-center w-full">
-                                    <span>{`Room ${index}`}</span>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <div className="cursor-pointer mb-2">
+                                                <span>{field.name}</span>
+                                            </div>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="flex flex-col gap-3">
+                                            <section className="flex flex-col gap-2">
+                                                <Label>Previous Name</Label>
+                                                <Input 
+                                                    disabled 
+                                                    value={field.name || `Room ${index + 1}`} 
+                                                />
+                                            </section>
+                                            <section className="flex flex-col gap-2">
+                                                <Label>Change Name</Label>
+                                                <Input 
+                                                    value={changeDormName}
+                                                    onChange={(e) => setChangeDormName(e.target.value)}
+                                                />
+                                            </section>
+                                            <Button 
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    update(index, {
+                                                        ...field,
+                                                        name: changeDormName,
+                                                    })
+                                                    setChangeDormName("");
+                                                }}
+                                                className="flex-grow self-end mt-5"
+                                            >Submit Changes</Button>
+                                        </PopoverContent>
+                                    </Popover>
                                     {fields.length > 1 && (
                                         <BadgeMinusIcon 
                                            onClick={(e) => {
@@ -269,13 +317,16 @@ export default function CreateListings() {
                                         )}
                                     />
                                 </div>
+                                <FormMessage>
+                                    {errors.rooms?.[index]?.occupied_beds?.message || errors.rooms?.[index]?.total_beds?.message}
+                                </FormMessage>
                             </article>
                         ))}
                         <Button 
                             onClick={(e) => {
                                 e.preventDefault();
                                 append({
-                                    room_name: `Room ${fields.length + 1}`,
+                                    name: `Room ${fields.length + 1}`,
                                     total_beds: 0,
                                     occupied_beds: 0
                                 })
