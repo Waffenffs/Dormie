@@ -5,9 +5,9 @@ import type { FileWithPath } from "react-dropzone";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { useState, useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useDropzone } from "react-dropzone";
-import { useState, useEffect } from "react";
 
 import imageCompression from "browser-image-compression";
 
@@ -18,6 +18,7 @@ import {
     BadgeMinus as BadgeMinusIcon,
     BadgeX as BadgeXIcon,
     Upload as UploadIcon,
+    Pencil as PencilIcon,
     Check as CheckIcon,
     Plus as PlusIcon,
     X as XIcon,
@@ -58,12 +59,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 
-// FIXME:
-// 1. Display the appropriate error message for rooms.
 const dormSchema = z.object({
     type: z
         .string()
-        .refine((val) => val === "private" || val === "shared", { message: "Invalid type." }),
+        .refine((val) => val === "private" || val === "shared", 
+        { message: "Invalid type." }
+    ),
     monthly_price: z.coerce.number().max(9999),
     rooms: z
         .array(
@@ -89,20 +90,20 @@ const dormSchema = z.object({
 export type DormSchema = z.infer<typeof dormSchema>;
 
 export default function CreateListings() {
+    const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
+        noDrag: true,
+        accept: {
+            'image/png': ['.png', '.jpg']
+        },
+        maxFiles: 3
+    })
+
     const [pending, setPending] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [changeDormName, setChangeDormName] = useState<string>("");
     // RHF's (react-hook-form) acceptedFiles property is immutable
-    // The imageFiles state is a workaround for us to be able mutate it
-    const [imageFiles, setImageFiles] = useState<FileWithPath[]>([]);
-
-    const { getRootProps, getInputProps, acceptedFiles } = useDropzone({
-        noDrag: true,
-        accept: {
-            'image/png': ['.png', '.jpeg']
-        },
-        maxFiles: 3
-    })
+    // Our imageFiles state is a workaround for us to be able mutate it
+    const [imageFiles, setImageFiles] = useState<typeof acceptedFiles>([]);
 
     useEffect(() => {
         setImageFiles([...acceptedFiles]);
@@ -237,8 +238,9 @@ export default function CreateListings() {
                                 <h3 className="text-md font-medium leading-none flex justify-between items-center w-full">
                                     <Popover>
                                         <PopoverTrigger asChild>
-                                            <div className="cursor-pointer mb-2">
+                                            <div className="cursor-pointer mb-2 flex flex-row items-center gap-2">
                                                 <span>{field.name}</span>
+                                                <PencilIcon size={20} />
                                             </div>
                                         </PopoverTrigger>
                                         <PopoverContent className="flex flex-col gap-3">
@@ -257,8 +259,8 @@ export default function CreateListings() {
                                                 />
                                             </section>
                                             <Button 
-                                                onClick={(e) => {
-                                                    e.preventDefault();
+                                                onClick={(event) => {
+                                                    event.preventDefault();
                                                     update(index, {
                                                         ...field,
                                                         name: changeDormName,
@@ -298,7 +300,6 @@ export default function CreateListings() {
                                             </FormItem>
                                         )}
                                     />
-
                                     <FormField
                                         control={form.control}
                                         name={`rooms.${index}.occupied_beds`}
@@ -360,7 +361,6 @@ export default function CreateListings() {
                                         ))
                                     )}
                                 </div>
-
                                 <div className="flex flex-row w-full rounded-[var(--radius)] border border-border p-4 overflow-x-auto">
                                     <Command>
                                         <CommandInput placeholder="Enter an amenity here..." />
