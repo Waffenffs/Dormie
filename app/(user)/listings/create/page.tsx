@@ -9,8 +9,8 @@ import { useDropzone } from "react-dropzone";
 
 import imageCompression from "browser-image-compression";
 
-import { uploadListing } from "./actions";
 import { AMENITIES } from "@/app/lib/constants";
+import { uploadListing } from "./actions";
 
 import {
     BadgeMinus as BadgeMinusIcon,
@@ -24,6 +24,9 @@ import {
 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Command,
     CommandEmpty,

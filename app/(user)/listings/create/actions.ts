@@ -7,16 +7,29 @@ import { v4 as uuidv4 } from 'uuid'
 import { createClient } from "@/supabase/server";
 
 export async function uploadListing(values: DormSchema, formData: FormData) {
+<<<<<<< HEAD
     const { amenities, rooms, ...listingValues } = values;
 
+=======
+>>>>>>> dev
     const supabase = createClient();
-    const listingId = uuidv4();
-    const imageFiles = formData.getAll('images') as File[];
 
     const { data: userData, error: userDataError } = await supabase.auth.getUser();
     if (userDataError) {
         throw new Error(userDataError.message);
     }
+
+    const { amenities, ...listingValues } = values;
+    const listingId = uuidv4();
+    const imageFiles = formData.getAll('images') as File[];
+
+<<<<<<< HEAD
+    const { data: userData, error: userDataError } = await supabase.auth.getUser();
+    if (userDataError) {
+        throw new Error(userDataError.message);
+    }
+=======
+>>>>>>> dev
 
     const { error: listingUploadError } = await supabase
         .from('listings')
