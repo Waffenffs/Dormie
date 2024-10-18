@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 
-const formSchema = z.object({
+const signupSchema= z.object({
     email: z
         .string()
         .trim()
@@ -32,22 +32,22 @@ const formSchema = z.object({
         .trim()
         .min(6, { message: "Password is too short." }),
 })
-export type FormSchema = z.infer<typeof formSchema> 
+export type SignupSchema = z.infer<typeof signupSchema> 
 
 export default function LoginPage() {
     const [mode, setMode] = useState<"login" | "register" | undefined>(undefined);
     const [errorMessage, setErrorMessage] = useState<undefined | string>(undefined);
     const [pending, setPending] = useState(false);
 
-    const form = useForm<FormSchema>({
-        resolver: zodResolver(formSchema),
+    const form = useForm<SignupSchema>({
+        resolver: zodResolver(signupSchema),
         defaultValues: {
             email: "",
             password: "",
         }
     })
 
-    async function onSubmit(values: FormSchema) {
+    async function onSubmit(values: SignupSchema) {
         if (mode !== undefined) {
             setPending(true);
 
