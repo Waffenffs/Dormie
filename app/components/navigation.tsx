@@ -6,11 +6,24 @@ import { logout } from "../(user)/actions";
 
 import Link from "next/link";
 
-import { House as HouseIcon } from "lucide-react"
+import {
+    House as HouseIcon,
+    Menu as MenuIcon,
+    ChevronRight as ChevronRightIcon
+} from "lucide-react"
+
+import ThemeSwitcherButton from "./button-themeswitcher";
 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import ThemeSwitcherButton from "./button-themeswitcher";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu"
 
 export default function Navigation({ user }: { user: User | null }) {
     const handleLogout = async () => {
@@ -34,21 +47,38 @@ export default function Navigation({ user }: { user: User | null }) {
                     <span>Dormie</span>
                 </Link>
             </section>
-            <section className="flex flex-row justify-center items-center gap-2">
+
+            <section className="flex flex-row justify-center items-center gap-5">
                 <ThemeSwitcherButton />
-                {
-                    user === null ?
-                    <Button asChild>
-                        <Link href={'/login'}>Login / Register</Link>
-                    </Button>
-                    :
-                    <Button
-                        variant={"destructive"}
-                        onClick={() => handleLogout()}
-                    >
-                        <span>Logout</span>
-                    </Button>
-                }
+                <DropdownMenu>
+                    <DropdownMenuTrigger>
+                        <MenuIcon />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="m-2 md:w-32">
+                        <DropdownMenuLabel>Pages</DropdownMenuLabel>
+                        <DropdownMenuItem className="flex flex-row items-center">
+                            <Link href={'/listings/explore'}>Explore</Link>
+                            <ChevronRightIcon size={20} />
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel>Account</DropdownMenuLabel>
+                        <DropdownMenuItem>
+                            {
+                                user === null ?
+                                <Button asChild>
+                                    <Link href={'/login'}>Login / Register</Link>
+                                </Button>
+                                :
+                                <Button
+                                    variant={"destructive"}
+                                    onClick={() => handleLogout()}
+                                >
+                                    <span className="text-md">Logout</span>
+                                </Button>
+                            }
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </section>
         </nav>
     )
