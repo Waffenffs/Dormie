@@ -164,7 +164,6 @@ export default function CreateListings() {
                     setSubmitted(true);
                 }
             } catch (error) {
-                console.error(error);
                 if (error instanceof Error) {
                     toast.error(error.message)
                 }

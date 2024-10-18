@@ -26,7 +26,7 @@ export default async function CreateListingsLayout({ children }: React.PropsWith
         .select('role')
         .eq('id', userData.user.id)
         .single()
-    if (roleData?.role !== "owner") {
+    if (roleData?.role !== "Owner") {
         return redirect('/listings/explore')
     }
     

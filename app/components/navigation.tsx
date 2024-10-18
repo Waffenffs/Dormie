@@ -4,13 +4,23 @@ import type { User } from "@supabase/supabase-js";
 
 import { logout } from "../(user)/actions";
 
-import ThemeSwitcherButton from "./button-themeswitcher";
 import Link from "next/link";
+
+import { House as HouseIcon } from "lucide-react"
+
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import ThemeSwitcherButton from "./button-themeswitcher";
 
 export default function Navigation({ user }: { user: User | null }) {
     const handleLogout = async () => {
-        await logout();
+        try {
+            await logout();
+        } catch (error) {
+            if (error instanceof Error) {
+                toast.error(error.message);
+            }
+        }
     }
 
     return (
@@ -18,8 +28,11 @@ export default function Navigation({ user }: { user: User | null }) {
             <section>
                 <Link 
                     href={"/"} 
-                    className="text-2xl md:text-4xl font-bold tracking-wide"
-                >Dormie</Link>
+                    className="text-2xl md:text-4xl font-bold tracking-wide flex flex-row items-center gap-1"
+                >
+                    <HouseIcon  size={30} />
+                    <span>Dormie</span>
+                </Link>
             </section>
             <section className="flex flex-row justify-center items-center gap-2">
                 <ThemeSwitcherButton />
@@ -32,7 +45,9 @@ export default function Navigation({ user }: { user: User | null }) {
                     <Button
                         variant={"destructive"}
                         onClick={() => handleLogout()}
-                    >Logout</Button>
+                    >
+                        <span>Logout</span>
+                    </Button>
                 }
             </section>
         </nav>
