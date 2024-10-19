@@ -2,7 +2,7 @@ import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 export function createClient() {
-    // Cookies are named by default: sb-<project_ref>-auth-token
+    // Cookies, by default, are named: sb-<project_ref>-auth-token
     const cookieStore = cookies();
 
     return createServerClient(

@@ -54,7 +54,7 @@ export default function Navigation({ user }: { user: User | null }) {
                     <DropdownMenuTrigger>
                         <MenuIcon />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="m-2 md:w-32">
+                    <DropdownMenuContent className="m-2 md:w-44">
                         <DropdownMenuLabel>Pages</DropdownMenuLabel>
                         <DropdownMenuItem className="flex flex-row items-center">
                             <Link href={'/listings/explore'}>Explore</Link>

@@ -1,22 +1,38 @@
 'use client';
 
 import type { User } from "@supabase/supabase-js"
-import type { USER_ROLE } from "@/app/lib/constants";
+import type {
+    USER_ROLE,
+    DORM_TYPE,
+    AMENITY
+} from "@/app/lib/constants";
 
 import { useState, useEffect } from "react";
 
-import { USER_ROLES } from "@/app/lib/constants";
-
-import { submit_role } from "../actions";
+import {
+    USER_ROLES, 
+    DORM_TYPES,
+    AMENITIES
+} from "@/app/lib/constants";
 import { wait } from "@/app/lib/utils";
 
+import { submit_role } from "../actions";
+
 import {
+    UsersRound as UsersRoundIcon,
     Building2 as Building2Icon, 
+    UserRound as UserRoundIcon,
     BookOpen as BookOpenIcon, 
-    Check as CheckIcon
+    Filter as FilterIcon,
+    Search as SearchIcon,
+    Check as CheckIcon,
 } from "lucide-react"
+
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Slider } from "@/components/ui/slider";
 import {
   Dialog,
   DialogContent,
@@ -25,16 +41,38 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+    Drawer,
+    DrawerClose,
+    DrawerTrigger,
+    DrawerContent,
+    DrawerTitle,
+    DrawerDescription,
+    DrawerHeader,
+    DrawerFooter,
+} from "@/components/ui/drawer"
 
 type ListingsPageProps = {
     user: User | null;
     role_initialized: boolean
 }
 
+// IMPLEMENT:
+// 1. Search queries should appear on the URL
+// So that they can copy & paste it for others to have the same queries
+
 export default function ListingsPage(props: ListingsPageProps) {
+    // dialog states 
     const [showRoleDialog, setShowRoleDialog] = useState<boolean | undefined>();
     const [submittedRole, setSubmittedRole] = useState<boolean | undefined>(undefined);
-    const [selected, setSelected] = useState<USER_ROLE | undefined>(undefined);
+    const [selectedRole, setSelectedRole] = useState<USER_ROLE | undefined>(undefined);
+
+    // query/filter states 
+    const [search, setSearch] = useState("");
+    const [selectedRoleDormType, setSelectedDormType] = useState<DORM_TYPE | undefined>(undefined);
+    const [selectedAmenities, setSelectedAmenities] = useState<AMENITY[]>([]);
+    const [selectedRooms, setSelectedRooms] = useState(1);
+    const [priceRange, setPriceRange] = useState([1000, 3500]);
 
     useEffect(() => {
         if (!showRoleDialog) {
@@ -42,8 +80,17 @@ export default function ListingsPage(props: ListingsPageProps) {
         }
     }, [])
 
+    // User first gets into the page
+    // Because there are no query paramters, layout will just regularly fetch dorms
+    // User clicks "Apply Filters"
+    // Page gets refreshed 
+    // If there are query parameters in the URL
+    // layout will take those and then filter through dorms...
+    // WOW!
+    // That means I don't have to use API routes anymore.
+
     const handleRoleSubmit = async () => {
-        if (selected === undefined) {
+        if (selectedRole === undefined) {
             return toast.error('Please choose a role!')
         }
         if (props.user === null) {
@@ -51,7 +98,7 @@ export default function ListingsPage(props: ListingsPageProps) {
         }
 
         try {
-            await submit_role(selected, props.user.id);
+            await submit_role(selectedRole, props.user.id);
             setSubmittedRole(true);
         } catch (error) {
             if (error instanceof Error) {
@@ -61,8 +108,122 @@ export default function ListingsPage(props: ListingsPageProps) {
     }
 
     return (
-        <main className="bg-muted overflow-auto w-full h-full">
-            Hi
+        <main className="bg-muted overflow-auto w-full h-screen">
+            <div className="md:hidden w-full flex justify-center items-center py-5">
+                <div className="bg-background rounded-[var(--radius)] p-4 w-4/5 flex flex-row items-center">
+                    <Input
+                        searchIcon={SearchIcon}
+                        className="w-11/12"
+                        placeholder="Enter dorm name here..."
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                    />
+                    <Drawer>
+                        <DrawerTrigger className="flex-grow flex justify-center items-center">
+                            <FilterIcon />
+                        </DrawerTrigger>
+                        <DrawerContent className="px-5 pb-10 md:hidden">
+                            <DrawerHeader>
+                                <DrawerTitle>Filter Dorms</DrawerTitle>
+                                <DrawerDescription>You can filter and search for your dream dorms here.</DrawerDescription>
+                            </DrawerHeader>
+                            <div className="flex flex-col gap-3 pt-5">
+                                <DrawerTitle>Dorm Type</DrawerTitle>
+                                <div className="w-full flex justify-between items-center gap-4">
+                                    {DORM_TYPES.map((type) => (
+                                        <div
+                                            key={type}
+                                            className={`
+                                                w-1/2 h-24 transition duration-150 cursor-pointer flex flex-col gap-2 justify-center items-center rounded-[var(--radius)] border 
+                                                ${selectedRoleDormType === type ? 'bg-primary text-white shadow-xl' : 'border-border'}
+                                            `}
+                                            onClick={() => setSelectedDormType(type)}
+                                        >
+                                            {type === "Shared" ? <UsersRoundIcon /> : <UserRoundIcon />}
+                                            <h1>{type}</h1>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-3 pt-10">
+                                <DrawerTitle>Amenities</DrawerTitle>
+                                <div className="grid grid-cols-2 gap-3">
+                                    {AMENITIES.map((amenity) => (
+                                        <div 
+                                            key={amenity} 
+                                            className="flex flex-row items-center gap-2"
+                                        >
+                                            <Checkbox 
+                                                id={amenity}
+                                                checked={selectedAmenities.includes(amenity)}
+                                                onCheckedChange={(checked) => {
+                                                    return checked
+                                                    ?
+                                                    setSelectedAmenities(prevState => [...prevState, amenity])
+                                                    :
+                                                    setSelectedAmenities(prevState => {
+                                                        const updatedAmenities = prevState.filter((thisAmenity) => thisAmenity !== amenity);
+
+                                                        return updatedAmenities;
+                                                    })
+                                                }}
+                                            />
+                                            <label htmlFor={amenity}>{amenity}</label>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-5 pt-10">
+                                <DrawerTitle>Price Range</DrawerTitle>
+                                <Slider 
+                                    defaultValue={priceRange} 
+                                    onValueChange={(value) => setPriceRange([...value])}
+                                    max={9999}
+                                    min={0}
+                                    step={250}
+                                    // minStepsBetweenThumbs={250}
+                                />
+                                <section className="w-full flex flex-row justify-center items-center gap-10">
+                                    <div className="flex flex-col gap-1 text-center">
+                                        <Input 
+                                            value={priceRange[0]} 
+                                            disabled
+                                            className="w-32"
+                                        />
+                                        <label className="text-muted-foreground font-semibold">Min</label>
+                                    </div>
+                                    <div className="flex flex-col gap-1 text-center">
+                                        <Input 
+                                            value={priceRange[1]}
+                                            disabled
+                                            className="w-32"
+                                        />
+                                        <label className="text-muted-foreground font-semibold">Max</label>
+                                    </div>
+                                </section>
+                            </div>
+                            <div className="flex flex-col gap-5 pt-10">
+                                <DrawerTitle>Rooms</DrawerTitle>
+                                <div className="w-full flex flex-row justify-around items-center gap-3">
+                                    {[1, 2, 3, 4, 5].map((number) => (
+                                        <div 
+                                            key={number}
+                                            className={`
+                                                w-1/2 h-14 transition duration-150 cursor-pointer flex flex-col gap-2 justify-center items-center rounded-[var(--radius)] border font-semibold 
+                                                ${selectedRooms === number ? 'bg-primary text-white shadow-xl' : 'border-border'}
+                                            `}
+                                            onClick={() => setSelectedRooms(number)}
+                                        >{number}</div>
+                                    ))}
+                                </div>
+                            </div>
+                            <DrawerFooter className="pt-14">
+                                <Button>Apply Filters</Button>
+                            </DrawerFooter>
+                        </DrawerContent>
+                    </Drawer>
+                </div>
+            </div>
             <Dialog 
                 open={!props.role_initialized && props.user !== null && !submittedRole && showRoleDialog}
                 onOpenChange={(showRoleDialog) => {
@@ -85,9 +246,9 @@ export default function ListingsPage(props: ListingsPageProps) {
                                 key={role}
                                 className={`
                                     w-1/2 h-32 transition duration-150 cursor-pointer flex flex-col gap-2 justify-center items-center rounded-[var(--radius)] border 
-                                    ${selected === role ? 'bg-primary text-white shadow-xl' : 'border-border'}
+                                    ${selectedRole === role ? 'bg-primary text-white shadow-xl' : 'border-border'}
                                 `}
-                                onClick={() => setSelected(role)}
+                                onClick={() => setSelectedRole(role)}
                             >
                                 {role === "Owner" ? <Building2Icon /> : <BookOpenIcon />}
                                 <h1>{role}</h1>

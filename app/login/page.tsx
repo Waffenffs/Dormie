@@ -60,6 +60,8 @@ export default function LoginPage() {
             } finally {
                 setPending(false);
             } 
+        } else {
+            console.log("Mode doesn't seem to be carrying over?");
         }
     }
 

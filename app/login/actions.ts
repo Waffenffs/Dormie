@@ -17,7 +17,6 @@ export async function authenticate(
             email: values.email,
             password: values.password
         })
-
         if (signInError) {
             throw new Error(signInError.message);
         }
@@ -29,7 +28,6 @@ export async function authenticate(
             email: values.email,
             password: values.password
         })
-
         if (signUpError) {
             throw new Error(signUpError.message)
         }
@@ -39,7 +37,6 @@ export async function authenticate(
             id: userData.user?.id,
             email: values.email
         })
-
         if (userError) {
             throw new Error(userError.message)
         }
