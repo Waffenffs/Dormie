@@ -2,8 +2,8 @@
 
 ## Tech Stack
 
-- Next.js — **Server Components and Server Actions**
-- Supabase — **Database, Auth & Storage**
+- Next.js — **Server Components, CLI, and Server Actions**
+- Supabase — **Database, CLI, Auth & Storage**
 - ShadcnUI & Tailwind CSS — **Styling**
 - Zod — **Type-Safety and Data Validation**
 
