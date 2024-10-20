@@ -9,6 +9,13 @@ export const AMENITIES = [
 ] as const;
 export type AMENITY = typeof AMENITIES[number];
 
+export const GENDER_PREFERENCES = [
+    "Female Only",
+    "Male Only",
+    "Both"
+] as const;
+export type GENDER_PREFERENCE = typeof GENDER_PREFERENCES[number]
+
 export const DORM_TYPES = [
     'Private',
     'Shared',
