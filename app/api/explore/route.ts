@@ -1,7 +1,4 @@
 import { NextResponse, NextRequest } from "next/server";
-import { createClient } from "@/supabase/server";
-
-// const supabase = createClient();
 
 // query params:
 // -- type

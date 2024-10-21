@@ -3,13 +3,15 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { genderPreferenceWithIcon } from "@/app/lib/shared";
+
 import { useState, useEffect } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useDropzone } from "react-dropzone";
 
 import imageCompression from "browser-image-compression";
 
-import { AMENITIES } from "@/app/lib/constants";
+import { AMENITIES, GENDER_PREFERENCES } from "@/app/lib/constants";
 import { uploadListing } from "./actions";
 
 import {
@@ -60,8 +62,13 @@ import { Separator } from "@/components/ui/separator";
 const dormSchema = z.object({
     type: z
         .string()
-        .refine((val) => val === "private" || val === "shared", 
+        .refine((val) => val === "Private" || val === "Shared", 
         { message: "Invalid type." }
+    ),
+    gender_preference: z
+        .string()
+        .refine((val) => val === "Female Only" || val === "Male Only" || val === "Both",
+        {message: "Invalid gender preference."}
     ),
     monthly_price: z.coerce.number().max(9999),
     rooms: z
@@ -110,7 +117,7 @@ export default function CreateListings() {
     const form = useForm<DormSchema>({
         resolver: zodResolver(dormSchema),
         defaultValues: {
-            type: "shared",
+            type: "Shared",
             monthly_price: 0,
             rooms: [{ 
                 name: "Room 1",
@@ -149,7 +156,7 @@ export default function CreateListings() {
                     toast.success("Successfully created a dorm listing! We are shortly redirecting you...")
                     // We have to do this manually because RHF is the worst library of all time
                     form.reset({
-                        type: "shared",
+                        type: "Shared",
                         monthly_price: 0,
                         amenities: [],
                         rooms: [{
@@ -199,8 +206,8 @@ export default function CreateListings() {
                                             </SelectTrigger>
                                         </FormControl>
                                         <SelectContent>
-                                            <SelectItem value="shared">Shared Dorm</SelectItem>
-                                            <SelectItem value="private">Private Dorm</SelectItem>
+                                            <SelectItem value="Shared">Shared Dorm</SelectItem>
+                                            <SelectItem value="Private">Private Dorm</SelectItem>
                                         </SelectContent>
                                     </Select>
                                     <FormMessage />
@@ -225,6 +232,32 @@ export default function CreateListings() {
                             )}
                         />
                     </div>
+                    <FormField
+                        control={form.control}
+                        name="gender_preference"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col gap-2">
+                                <FormLabel>Tenant Gender Preference</FormLabel>
+                                <div aria-label="Gender Preference" className="flex flex-row justify-evenly items-center gap-3">
+                                    {GENDER_PREFERENCES.map((pref) => (
+                                        <div
+                                            key={pref}
+                                            role="button"
+                                            aria-pressed={field.value === pref}
+                                            className={`
+                                                py-1 flex-grow flex flex-row items-center justify-center gap-1 transition duration-150 border border-border rounded-[var(--radius)]
+                                                ${field.value === pref && 'bg-primary text-white shadow-xl'}
+                                            `}
+                                            onClick={() => field.onChange(pref)}
+                                        >
+                                            {genderPreferenceWithIcon[pref]}
+                                            <span>{pref}</span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </FormItem>
+                        )}
+                    />
                     <Label>Rooms</Label>
                     <div className="flex flex-col gap-4 items-center rounded-[var(--radius)] border border-border p-6 bg-muted">
                         {fields.map((field, index) => (
@@ -381,7 +414,7 @@ export default function CreateListings() {
                                         </CommandList>
                                     </Command>
                                 </div>
-                                <FormDescription>What amenities does your dorm include? Please select from our given options.</FormDescription>
+                                <FormDescription>What amenities does your dorm include? Please select from our available options.</FormDescription>
                                 <FormMessage />
                             </FormItem>
                         )}
