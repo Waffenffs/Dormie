@@ -7,7 +7,7 @@ import type {
     AMENITY,
     GENDER_PREFERENCE
 } from "@/app/lib/constants";
-import { genderPreferenceWithIcon } from "@/app/lib/shared";
+import { genderPreferenceIcon } from "@/app/lib/shared";
 
 import { useState, useEffect } from "react";
 
@@ -154,7 +154,7 @@ export default function ListingsPage(props: ListingsPageProps) {
                                                 `}
                                                 onClick={() => setSelectedGenderPreference(pref)}
                                             >
-                                                {genderPreferenceWithIcon[pref]}
+                                                {genderPreferenceIcon[pref]}
                                                 <span>{pref}</span>
                                             </div>
                                         ))}

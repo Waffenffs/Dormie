@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { createClient } from "@/supabase/server";
 
 export async function uploadListing(values: DormSchema, formData: FormData) {
-    const { amenities, rooms, ...listingValues } = values;
+    const { amenities, rooms, other_conveniences, ...listingValues } = values;
 
     const supabase = createClient();
 
@@ -29,6 +29,18 @@ export async function uploadListing(values: DormSchema, formData: FormData) {
     if (listingUploadError) {
         throw new Error(listingUploadError.message);
     }
+
+    const conveniencePromises = other_conveniences?.map(async (convenience) => {
+        const { error: convenienceUploadError } = await supabase
+            .from('listings_conveniences')
+            .insert({
+                ...convenience,
+                for_listing: listingId
+            })
+        if (convenienceUploadError) {
+            throw new Error(convenienceUploadError.message);
+        }
+    })
 
     const roomPromises = rooms.map(async (room) => {
         const { error: roomUploadError } = await supabase
@@ -54,8 +66,8 @@ export async function uploadListing(values: DormSchema, formData: FormData) {
         }
     })
 
-    const imageUrl = `listing_image_${uuidv4()}`
     const imagePromises = imageFiles.map(async (image) => {
+        const imageUrl = `listing_image_${uuidv4()}`
         const { error: imageUploadError } = await supabase
             .storage
             .from('/images/listings')
@@ -79,8 +91,9 @@ export async function uploadListing(values: DormSchema, formData: FormData) {
         await Promise.all([
             ...amenityPromises, 
             ...imagePromises, 
-            ...roomPromises
-            ]);
+            ...roomPromises,
+            ...(conveniencePromises ?? [])
+        ]);
     } catch (error) {
         throw error; // We'll throw it again so our client can catch it
     } 

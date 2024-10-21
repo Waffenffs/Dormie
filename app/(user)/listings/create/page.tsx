@@ -5,7 +5,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 
 import { genderPreferenceWithIcon } from "@/app/lib/shared";
 
-import { useState, useEffect } from "react";
+import { genderPreferenceIcon } from "@/app/lib/shared";
+
+import { useState, useEffect, Fragment } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { useDropzone } from "react-dropzone";
 
@@ -71,6 +73,12 @@ const dormSchema = z.object({
         {message: "Invalid gender preference."}
     ),
     monthly_price: z.coerce.number().max(9999),
+    location: z.string().trim().optional(),
+    gender_preference: z
+        .string()
+        .refine((val) => val === "Female Only" || val === "Male Only" || val === "Both",
+        {message: "Invalid gender preference."}
+    ),
     rooms: z
         .array(
             z.object({
@@ -86,6 +94,12 @@ const dormSchema = z.object({
         .string()
         .array()
         .nonempty({ message: "At least one amenity must be included." }),
+    other_conveniences: z
+        .array(
+            z.object({
+                title: z.string().trim().min(4, { message: "Convenience is too short." })
+            })
+        ).optional(),
     title: z
         .string()
         .trim()
@@ -105,7 +119,8 @@ export default function CreateListings() {
 
     const [pending, setPending] = useState(false);
     const [submitted, setSubmitted] = useState(false);
-    const [changeDormName, setChangeDormName] = useState<string>("");
+    const [changeDormName, setChangeDormName] = useState("");
+    const [convenienceInput, setConvenienceInput] = useState("");
     // RHF's (react-hook-form) acceptedFiles property is immutable
     // Our imageFiles state is a workaround for us to be able mutate it
     const [imageFiles, setImageFiles] = useState<typeof acceptedFiles>([]);
@@ -123,15 +138,19 @@ export default function CreateListings() {
                 name: "Room 1",
                 total_beds: 0, 
                 occupied_beds: 0
-            }]
+            }],
         }
     })
 
     const { control, formState: { errors } } = form;
 
-    const { fields, append, remove, update } = useFieldArray({
+    const { fields: roomFields, append: appendRoom, remove: removeRoom, update: updateRoom } = useFieldArray({
         control,
         name: "rooms"
+    })
+    const { fields: convenienceFields, append: appendConvenience, remove: removeConvenience } = useFieldArray({
+        control,
+        name: "other_conveniences"
     })
 
     async function onSubmit(values: DormSchema) {
@@ -158,12 +177,15 @@ export default function CreateListings() {
                     form.reset({
                         type: "Shared",
                         monthly_price: 0,
+                        location: "",
+                        gender_preference: undefined,
                         amenities: [],
                         rooms: [{
                             name: "Room 1",
                             total_beds: 0,
                             occupied_beds: 0
                         }],
+                        other_conveniences: undefined,
                         title: "",
                         description: ""
                     })
@@ -234,6 +256,22 @@ export default function CreateListings() {
                     </div>
                     <FormField
                         control={form.control}
+                        name="location"
+                        render={({ field }) => (
+                            <FormItem className="flex flex-col gap-2">
+                                <div className="flex flex-row items-center gap-1">
+                                    <FormLabel>Location</FormLabel>
+                                    <FormDescription>(Optional)</FormDescription>
+                                </div>
+                                <Input
+                                    type="text"
+                                    {...field}
+                                />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
                         name="gender_preference"
                         render={({ field }) => (
                             <FormItem className="flex flex-col gap-2">
@@ -250,7 +288,7 @@ export default function CreateListings() {
                                             `}
                                             onClick={() => field.onChange(pref)}
                                         >
-                                            {genderPreferenceWithIcon[pref]}
+                                            {genderPreferenceIcon[pref]}
                                             <span>{pref}</span>
                                         </div>
                                     ))}
@@ -260,7 +298,7 @@ export default function CreateListings() {
                     />
                     <Label>Rooms</Label>
                     <div className="flex flex-col gap-4 items-center rounded-[var(--radius)] border border-border p-6 bg-muted">
-                        {fields.map((field, index) => (
+                        {roomFields.map((field, index) => (
                             <article 
                                 key={field.id}
                                 className="w-full p-3 border border-border rounded-[var(--radius)] shadow-md bg-background"
@@ -291,7 +329,7 @@ export default function CreateListings() {
                                             <Button 
                                                 onClick={(event) => {
                                                     event.preventDefault();
-                                                    update(index, {
+                                                    updateRoom(index, {
                                                         ...field,
                                                         name: changeDormName,
                                                     })
@@ -301,11 +339,11 @@ export default function CreateListings() {
                                             >Submit Changes</Button>
                                         </PopoverContent>
                                     </Popover>
-                                    {fields.length > 1 && (
+                                    {roomFields.length > 1 && (
                                         <BadgeMinusIcon 
                                            onClick={(e) => {
                                             e.preventDefault();
-                                            remove(index);
+                                            removeRoom(index);
                                            }}
                                            className="hover:cursor-pointer hover:text-red-500 transition duration-300"
                                         />
@@ -356,8 +394,8 @@ export default function CreateListings() {
                         <Button 
                             onClick={(e) => {
                                 e.preventDefault();
-                                append({
-                                    name: `Room ${fields.length + 1}`,
+                                appendRoom({
+                                    name: `Room ${roomFields.length + 1}`,
                                     total_beds: 0,
                                     occupied_beds: 0
                                 })
@@ -374,10 +412,10 @@ export default function CreateListings() {
                         render={({ field }) => (
                             <FormItem>
                                 <FormLabel>Amenities</FormLabel>
-                                <div className="flex flex-row gap-2 w-full overflow-x-auto">
+                                <div className="flex flex-col md:flex-row md:flex-wrap gap-2">
                                     {Array.isArray(field.value) && (
                                         field.value?.map((amenity) => (
-                                            <div className="flex flex-row gap-2 items-center rounded-[var(--radius)] border border-border py-1 px-3 text-sm font-semibold tracking-wide hover:bg-muted transition duration-300">
+                                            <div className="hover:cursor-default self-start flex flex-row gap-2 items-center rounded-[var(--radius)] border border-border py-1 px-3 text-sm font-semibold tracking-wide hover:bg-muted transition duration-300">
                                                 <span>Includes {amenity}</span>
                                                 <XIcon 
                                                     className="hover:cursor-pointer hover:text-red-500"
@@ -416,6 +454,66 @@ export default function CreateListings() {
                                 </div>
                                 <FormDescription>What amenities does your dorm include? Please select from our available options.</FormDescription>
                                 <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    <FormField
+                        control={form.control}
+                        name="other_conveniences"
+                        render={({ field }) => (
+                            <FormItem>
+                                <div className="flex flex-row items-center gap-1">
+                                    <FormLabel>Other Conveniences</FormLabel>
+                                    <FormDescription>(Optional)</FormDescription>
+                                </div>
+                                <section className="min-h-32 border border-border rounded-[var(--radius)] flex flex-col p-3 justify-start gap-2">
+                                    {(field.value?.length === 0 || field.value === undefined) ? (
+                                        <div className="w-full h-full flex justify-center">
+                                            <h3 className="text-muted-foreground font-semibold">Empty. You can add some!</h3>
+                                        </div>
+                                    ) : (
+                                        field.value?.map((convenience, index) => (
+                                            <Fragment>
+                                                <div className="w-full flex flex-row items-center gap-3 text-sm">
+                                                    <span className="font-semibold">{index + 1}.</span>
+                                                    <p>{convenience.title}</p>
+                                                    <Button
+                                                        className="ml-auto"
+                                                        variant={"destructive"}
+                                                        size={"icon"}
+                                                        onClick={(event) => {
+                                                            event.preventDefault()
+                                                            removeConvenience(index)
+                                                        }}
+                                                    >
+                                                        <XIcon />
+                                                    </Button>
+                                                </div>
+                                                {index !== field.value?.length && <Separator />}
+                                            </Fragment>
+                                        ))
+                                    )}
+                                </section>
+                                <div className="flex flex-row items-center gap-3">
+                                    <Input 
+                                        type="text"
+                                        placeholder="E.g. Allows cooking"
+                                        value={convenienceInput}
+                                        onChange={(event) => setConvenienceInput(event.target.value)}
+                                    />
+                                    <Button
+                                        onClick={(event) => {
+                                            event.preventDefault()
+                                            if (convenienceInput.trim().length <= 4) {
+                                                return toast.error("Convenience item is too short.")
+                                            }
+                                            appendConvenience({ title: convenienceInput })
+                                            setConvenienceInput("");
+                                        }}
+                                    >
+                                        <PlusIcon />
+                                    </Button>
+                                </div>
                             </FormItem>
                         )}
                     />

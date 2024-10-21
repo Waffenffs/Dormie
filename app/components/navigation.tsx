@@ -2,6 +2,8 @@
 
 import type { User } from "@supabase/supabase-js";
 
+import { useState, useEffect } from "react";
+
 import { logout } from "../(user)/actions";
 
 import Link from "next/link";
@@ -37,7 +39,9 @@ export default function Navigation({ user }: { user: User | null }) {
     }
 
     return (
-        <nav className="w-full flex justify-between items-center items-center py-2 px-4 bg-background/50 backdrop-blur-md sticky top-0 relative z-50">
+        <nav 
+            className="w-full flex justify-between items-center items-center py-2 px-4 bg-background/50 backdrop-blur-md sticky top-0 relative z-50"
+        >
             <section>
                 <Link 
                     href={"/"} 

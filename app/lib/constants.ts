@@ -5,7 +5,8 @@ export const AMENITIES = [
     'Parking',
     'Pets Allowed',
     'Visitors Allowed',
-    'Air-Conditioning'
+    'Air-Conditioning',
+    'Freezer/Refrigeration'
 ] as const;
 export type AMENITY = typeof AMENITIES[number];
 
