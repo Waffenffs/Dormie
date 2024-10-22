@@ -1,6 +1,7 @@
 'use client';
 
 import type { User } from "@supabase/supabase-js"
+import { Tables } from "@/supabase/supabase/database.types";
 import type {
     USER_ROLE,
     DORM_TYPE,
@@ -8,6 +9,7 @@ import type {
     GENDER_PREFERENCE,
     FILTERS
 } from "@/app/lib/constants";
+
 import { genderPreferenceIcon } from "@/app/lib/shared";
 
 import { useState, useEffect } from "react";
@@ -61,7 +63,8 @@ import {
 
 type ListingsPageProps = {
     user: User | null;
-    role_initialized: boolean
+    role_initialized: Tables<'users'>['role_initialized'];
+    listings: Tables<'listings'>[];
 }
 
 export default function ListingsPage(props: ListingsPageProps) {
@@ -264,6 +267,7 @@ export default function ListingsPage(props: ListingsPageProps) {
                     </Drawer>
                 </div>
             </div>
+            <h1 className="text-2xl">TESTING</h1>
             <Dialog 
                 open={!props.role_initialized && props.user !== null && !submittedRole && showRoleDialog}
                 onOpenChange={(showRoleDialog) => {
