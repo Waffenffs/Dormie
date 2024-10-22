@@ -7,6 +7,9 @@ import { buildFiltersApiRequestURL } from "@/lib/apiHelpers";
 import { createClient } from "@/supabase/server"
 
 import { Fragment } from "react";
+import Loading from "./loading";
+
+import { Suspense } from "react";
 import ListingsPage from "./page";
 
 export const metadata: Metadata = {
@@ -37,6 +40,14 @@ export const metadata: Metadata = {
 // ----> we refresh/revalidate the path, forcing a re-fetch and we go back to STEP 1
 
 export default async function ListingsLayout() {
+    return (
+        <Suspense fallback={ <Loading /> }>
+            <ListingsWrapper />
+        </Suspense>
+    )
+}
+
+export async function ListingsWrapper() {
     const headersList = headers();
     const filters = headersList.get('filters')
     const parsedFilters = JSON.parse(filters ?? '');
@@ -72,9 +83,6 @@ export default async function ListingsLayout() {
         console.error(error);
     }
 
-    console.log('Listings data: ', listingsData?.data);
-
-    // pass down user role_initialized data
     const supabase = createClient();
     const { data } = await supabase.auth.getUser();
     const { data: userRoleData } = await supabase
@@ -87,6 +95,7 @@ export default async function ListingsLayout() {
         <Fragment>
             <ListingsPage
                 user={data?.user} 
+                listings={listingsData?.data}
                 role_initialized={userRoleData?.role_initialized} 
             />
         </Fragment>
