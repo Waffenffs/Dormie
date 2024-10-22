@@ -3,8 +3,6 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { genderPreferenceWithIcon } from "@/app/lib/shared";
-
 import { genderPreferenceIcon } from "@/app/lib/shared";
 
 import { useState, useEffect, Fragment } from "react";
@@ -18,12 +16,14 @@ import { uploadListing } from "./actions";
 
 import {
     BadgeMinus as BadgeMinusIcon,
+    LoaderCircle as LoadingIcon,
+    CircleHelp as QuestionMark,
     BadgeX as BadgeXIcon,
     Upload as UploadIcon,
     Pencil as PencilIcon,
     Check as CheckIcon,
     Plus as PlusIcon,
-    X as XIcon,
+    X as XIcon
 } from "lucide-react";
 
 import { toast } from "sonner";
@@ -52,6 +52,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger
+} from "@/components/ui/tooltip"
+import {
     Popover,
     PopoverContent,
     PopoverTrigger
@@ -74,11 +80,6 @@ const dormSchema = z.object({
     ),
     monthly_price: z.coerce.number().max(9999),
     location: z.string().trim().optional(),
-    gender_preference: z
-        .string()
-        .refine((val) => val === "Female Only" || val === "Male Only" || val === "Both",
-        {message: "Invalid gender preference."}
-    ),
     rooms: z
         .array(
             z.object({
@@ -148,7 +149,7 @@ export default function CreateListings() {
         control,
         name: "rooms"
     })
-    const { fields: convenienceFields, append: appendConvenience, remove: removeConvenience } = useFieldArray({
+    const { append: appendConvenience, remove: removeConvenience } = useFieldArray({
         control,
         name: "other_conveniences"
     })
@@ -217,7 +218,19 @@ export default function CreateListings() {
                             name="type"
                             render={({ field }) => (
                                 <FormItem className="mt-1">
-                                    <FormLabel>Dorm Type</FormLabel>
+                                    <section className="flex flex-row items-center gap-2">
+                                        <FormLabel>Dorm Type</FormLabel>
+                                        <TooltipProvider>
+                                            <Tooltip>
+                                                <TooltipTrigger>
+                                                    <QuestionMark className="w-5 text-muted-foreground" />
+                                                </TooltipTrigger>
+                                                <TooltipContent className="bg-secondary text-foreground max-w-xs">
+                                                    A private dorm means that each room will only house a single tenant. These are rare thus shared dorms are the default option.
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
+                                    </section>
                                     <Select
                                         onValueChange={field.onChange}
                                         {...field}
@@ -601,6 +614,7 @@ export default function CreateListings() {
                                 type="submit"
                                 disabled={pending || submitted}
                             >
+                                {pending && <LoadingIcon className="animate-spin w-5" />}
                                 {submitted && <CheckIcon />}
                                 Submit Dorm
                             </Button>

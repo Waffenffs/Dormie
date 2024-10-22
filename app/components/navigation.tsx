@@ -2,8 +2,6 @@
 
 import type { User } from "@supabase/supabase-js";
 
-import { useState, useEffect } from "react";
-
 import { logout } from "../(user)/actions";
 
 import Link from "next/link";
@@ -61,7 +59,10 @@ export default function Navigation({ user }: { user: User | null }) {
                     <DropdownMenuContent className="m-2 md:w-44">
                         <DropdownMenuLabel>Pages</DropdownMenuLabel>
                         <DropdownMenuItem className="flex flex-row items-center">
-                            <Link href={'/listings/explore'}>Explore</Link>
+                            <Link 
+                                href="/listings/explore" 
+                                className="w-full"
+                            >Explore</Link>
                             <ChevronRightIcon size={20} />
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />

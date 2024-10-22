@@ -5,11 +5,13 @@ import type {
     USER_ROLE,
     DORM_TYPE,
     AMENITY,
-    GENDER_PREFERENCE
+    GENDER_PREFERENCE,
+    FILTERS
 } from "@/app/lib/constants";
 import { genderPreferenceIcon } from "@/app/lib/shared";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import {
     USER_ROLES, 
@@ -20,6 +22,7 @@ import {
 import { wait } from "@/app/lib/utils";
 
 import { submit_role } from "../actions";
+import { buildFiltersApiRequestURL } from "@/lib/apiHelpers";
 
 import {
     UsersRound as UsersRoundIcon,
@@ -61,10 +64,6 @@ type ListingsPageProps = {
     role_initialized: boolean
 }
 
-// IMPLEMENT:
-// 1. Search queries should appear on the URL
-// So that they can copy & paste it for others to have the same queries
-
 export default function ListingsPage(props: ListingsPageProps) {
     // dialog states 
     const [showRoleDialog, setShowRoleDialog] = useState<boolean | undefined>();
@@ -84,6 +83,26 @@ export default function ListingsPage(props: ListingsPageProps) {
             wait(1000).then(() => setShowRoleDialog(true));
         }
     }, [])
+
+    const router = useRouter();
+
+    const handleApplyFilter = () => {
+        const filters: FILTERS = {
+            dorm_type: selectedRoleDormType?.trim().toLowerCase(),
+            gender_pref: selectedGenderPreference?.trim().toLowerCase(),
+            amenities: selectedAmenities?.map((amenity) => amenity.toLowerCase()).join(','),
+            pricing: priceRange.map((price) => price.toString()).join(','),
+            rooms: selectedRooms?.toString()
+        }
+
+        const callableApiURL = buildFiltersApiRequestURL(
+            'http://localhost:3000/listings/explore?',
+            filters
+        )
+
+        router.push(callableApiURL.toString());
+        router.refresh();
+    }
 
     const handleRoleSubmit = async () => {
         if (selectedRole === undefined) {
@@ -232,7 +251,10 @@ export default function ListingsPage(props: ListingsPageProps) {
                                     </div>
                                 </div>
                                 <DrawerFooter className="pt-14 flex flex-col gap-3">
-                                    <Button>Apply Filters</Button>
+                                    <Button onClick={(event) => {
+                                        event.preventDefault();
+                                        handleApplyFilter();
+                                    }}>Apply Filters</Button>
                                     <DrawerClose asChild>
                                         <Button variant={"outline"}>Close</Button>
                                     </DrawerClose>

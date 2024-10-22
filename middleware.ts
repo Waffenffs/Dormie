@@ -1,8 +1,34 @@
 import { type NextRequest } from 'next/server'
+import { type FILTERS } from './app/lib/constants';
+
+import { NextResponse } from 'next/server';
 import { updateSession } from '@/supabase/middleware'
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request)
+  const requestPathname = request.nextUrl.pathname;
+
+  if (requestPathname.startsWith('/listings/explore')) {
+    await updateSession(request);
+
+    const searchParams = request.nextUrl.searchParams;
+
+    const filters: FILTERS = {
+      dorm_type: searchParams.get('dorm_type'),
+      gender_pref: searchParams.get('gender_pref'),
+      amenities: searchParams.get('amenities'),
+      pricing: searchParams.get('pricing'),
+      rooms: searchParams.get('rooms')
+    }
+
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set('filters', JSON.stringify(filters));
+
+    return NextResponse.next({
+      request: { headers: requestHeaders }
+    });
+  }
+
+  return await updateSession(request);
 }
 
 // Modify matcher for routes that don't access supabase

@@ -1,3 +1,11 @@
+export interface FILTERS {
+    dorm_type: string | null | undefined;
+    gender_pref: string | null | undefined;
+    amenities: string | null | undefined;
+    pricing: string | null | undefined;
+    rooms: string | null | undefined;
+}
+
 export const AMENITIES = [
     'Wi-Fi/Internet',
     'Water Bills',
