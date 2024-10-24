@@ -6,7 +6,7 @@ import { Fragment } from "react";
 import ListingsPage from "./page";
 
 export const metadata: Metadata = {
-    title: "Dormie - Listings",
+    title: "MyCvSUDorm - Listings",
     authors: {
         name: "Waffen Sultan",
         url: "https://github.com/waffenffs"
